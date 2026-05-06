@@ -1,130 +1,1113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UPSC Flow | Gamified Learning</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>UPSC FLOW</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2eb;
+  --ink: #0d0d0d;
+  --ink2: #3a3a3a;
+  --muted: #888;
+  --accent: #c8f500;
+  --red: #e03030;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Barlow Condensed', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── HUD ─────────────────────────── */
+#hud {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 200;
+}
+
+#logo {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hud-right { display: flex; align-items: center; gap: 12px; }
+
+.hud-stat {
+  font-size: 0.68rem;
+  font-weight: 500;
+  opacity: 0.8;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+}
+.hud-stat .v { color: var(--accent); font-weight: 600; font-size: 0.78rem; }
+
+.hud-btn {
+  background: var(--accent);
+  color: var(--ink);
+  border: none;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 0.68rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.hud-btn:active { opacity: 0.8; }
+
+/* ── PROGRESS ────────────────────── */
+#prog {
+  position: fixed;
+  top: 48px; left: 0;
+  height: 2px;
+  background: var(--accent);
+  width: 0%;
+  z-index: 199;
+  transition: width 0.3s;
+}
+
+/* ── FEED ────────────────────────── */
+#feed {
+  position: fixed;
+  top: 50px; left: 0; right: 0; bottom: 44px;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+#feed::-webkit-scrollbar { display: none; }
+
+/* ── BOTTOM BAR ──────────────────── */
+#bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 44px;
+  background: var(--bg);
+  border-top: 2px solid var(--ink);
+  display: flex;
+  z-index: 200;
+}
+
+.bb {
+  flex: 1;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+  color: var(--ink2);
+  transition: background 0.12s, color 0.12s;
+}
+.bb:last-child { border-right: none; }
+.bb:hover { background: var(--ink); color: var(--bg); }
+.bb:active { background: var(--accent); color: var(--ink); }
+
+/* ── CARDS ───────────────────────── */
+.card {
+  height: calc(100dvh - 94px);
+  width: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+.card:nth-child(even) { background: #eceae1; }
+
+.cbox {
+  width: 100%;
+  max-width: 500px;
+  border: 2px solid var(--ink);
+  background: #fff;
+  animation: cIn 0.22s ease-out;
+  max-height: calc(100dvh - 122px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.cbox::-webkit-scrollbar { display: none; }
+
+@keyframes cIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.cstrip {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.cstrip .tag { color: var(--accent); }
+.cstrip .num { opacity: 0.4; font-size: 0.58rem; }
+
+.cbody { padding: 18px 16px 12px; }
+
+.ctitle {
+  font-family: var(--display);
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+  word-break: break-word;
+}
+
+.ctext {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--ink2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.facts {
+  margin-top: 10px;
+  border-top: 1px solid #e8e8e8;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.fact {
+  font-size: 0.73rem;
+  color: var(--ink2);
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.4;
+}
+.fact::before { content: '→'; position: absolute; left: 0; font-weight: 600; color: var(--ink); }
+
+.cimg {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-bottom: 2px solid var(--ink);
+  display: block;
+}
+
+/* MCQ */
+.mcq-q {
+  font-size: 0.87rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.opts { display: flex; flex-direction: column; gap: 7px; }
+
+.opt {
+  width: 100%;
+  background: none;
+  border: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  padding: 9px 11px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  line-height: 1.4;
+  color: var(--ink);
+  transition: background 0.1s, color 0.1s;
+}
+.opt:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
+.opt .ol { font-weight: 600; flex-shrink: 0; font-size: 0.68rem; min-width: 14px; }
+.opt.correct { background: var(--accent) !important; border-color: var(--ink); color: var(--ink) !important; }
+.opt.wrong { background: var(--red) !important; border-color: var(--red); color: #fff !important; }
+.opt:disabled { cursor: not-allowed; }
+
+.exp {
+  margin-top: 10px;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--ink2);
+  border-left: 3px solid var(--accent);
+  padding: 7px 10px;
+  display: none;
+}
+.exp.show { display: block; }
+
+/* Notes */
+.nsec {
+  border-top: 1px dashed #c8c8c8;
+  padding: 10px 16px;
+}
+.nlbl {
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.narea {
+  width: 100%;
+  min-height: 48px;
+  background: #fefce8;
+  border: 1px solid #d4c97a;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  line-height: 1.5;
+  padding: 7px 9px;
+  resize: none;
+  color: var(--ink);
+  outline: none;
+}
+.narea:focus { border-color: var(--ink); }
+
+/* Footer */
+.cfooter {
+  border-top: 1px solid #e8e8e8;
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafafa;
+}
+.fl { font-size: 0.58rem; color: var(--muted); }
+.fr { display: flex; gap: 6px; }
+
+.ibtn {
+  background: none;
+  border: 1px solid #ccc;
+  font-size: 0.62rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-family: var(--mono);
+  color: var(--ink2);
+  transition: all 0.1s;
+}
+.ibtn:hover { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.ibtn.del:hover { background: var(--red); border-color: var(--red); color: #fff; }
+.ibtn.rev:hover { background: var(--accent); border-color: var(--ink); color: var(--ink); }
+
+/* XP Flash */
+#xpf {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--display);
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 3px 3px 0 var(--ink);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 900;
+}
+@keyframes xpP {
+  0%   { opacity: 0; transform: translate(-50%,-40%) scale(0.5); }
+  30%  { opacity: 1; transform: translate(-50%,-60%) scale(1.1); }
+  80%  { opacity: 1; transform: translate(-50%,-70%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-90%) scale(0.9); }
+}
+.xpa { animation: xpP 0.85s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+/* ── EMPTY STATE ─────────────────── */
+#empty {
+  position: fixed;
+  top: 50px; left: 0; right: 0; bottom: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  z-index: 10;
+  padding: 24px;
+  text-align: center;
+}
+.erule { width: 48px; height: 4px; background: var(--ink); margin-bottom: 18px; }
+.etitle {
+  font-family: var(--display);
+  font-size: 2.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.esub { font-size: 0.73rem; color: var(--muted); max-width: 240px; line-height: 1.6; margin-bottom: 22px; }
+.ecta {
+  background: var(--ink);
+  color: var(--bg);
+  border: 2px solid var(--ink);
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 11px 22px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.ecta:hover { background: var(--accent); color: var(--ink); }
+
+/* ── OVERLAY / SHEET ─────────────── */
+.ov {
+  position: fixed;
+  inset: 0;
+  background: rgba(13,13,13,0.65);
+  z-index: 500;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.ov.open { display: flex; }
+
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 92dvh;
+  background: var(--bg);
+  border-top: 3px solid var(--ink);
+  overflow-y: auto;
+  scrollbar-width: none;
+  animation: su 0.22s cubic-bezier(0.16,1,0.3,1);
+}
+.sheet::-webkit-scrollbar { display: none; }
+@keyframes su { from { transform: translateY(28px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.shd {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.sht {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.shc {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.shc:hover { background: rgba(255,255,255,0.1); }
+
+.sbody { padding: 16px; }
+
+/* Form */
+.fld { margin-bottom: 13px; }
+.fld label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.fld input, .fld textarea, .fld select {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  padding: 9px 10px;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  appearance: none;
+}
+.fld input:focus, .fld textarea:focus, .fld select:focus {
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* Type toggle */
+.ttog {
+  display: flex;
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+  margin-bottom: 13px;
+}
+.topt {
+  flex: 1;
+  padding: 9px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: none;
+  border-right: 1px solid var(--ink);
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.topt:last-child { border-right: none; }
+.topt.on { background: var(--ink); color: var(--accent); }
+
+/* Upload zone */
+.uz {
+  border: 2px dashed var(--ink);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: var(--muted);
+  background: #fff;
+  margin-bottom: 10px;
+  transition: all 0.12s;
+}
+.uz:hover { border-color: var(--accent); }
+.uz .ui { font-size: 1.7rem; display: block; margin-bottom: 6px; }
+.uz input { display: none; }
+#uprev { width: 100%; max-height: 120px; object-fit: cover; border: 1.5px solid var(--ink); display: none; margin-bottom: 10px; }
+
+/* Opt inputs */
+.orow { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.olb { font-size: 0.64rem; font-weight: 600; width: 18px; flex-shrink: 0; color: var(--muted); }
+
+/* Submit */
+.sbtn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--bg);
+  border: 2px solid var(--ink);
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 0.76rem;
+  padding: 11px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+  transition: all 0.12s;
+}
+.sbtn:hover { background: var(--accent); color: var(--ink); }
+
+/* Stats */
+.stile {
+  border: 1.5px solid var(--ink);
+  padding: 12px 14px;
+  margin-bottom: 9px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sv { font-family: var(--display); font-size: 2rem; font-weight: 900; line-height: 1; }
+.sl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+.rbg { height: 6px; border: 1px solid var(--ink); background: #fff; margin: 10px 0 4px; overflow: hidden; }
+#rbar { height: 100%; background: var(--accent); transition: width 0.5s; }
+
+.rname { font-family: var(--display); font-size: 1.5rem; font-weight: 900; text-transform: uppercase; }
+
+.dbtn {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: 1.5px solid var(--red);
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.dbtn:hover { background: var(--red); color: #fff; }
+
+/* Browse */
+.brow {
+  display: flex;
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.bchip {
+  flex: 1;
+  padding: 7px 4px;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: none;
+  border-right: 1px solid var(--ink);
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.bchip:last-child { border-right: none; }
+.bchip.on { background: var(--ink); color: var(--accent); }
+
+.brow-item {
+  border: 1.5px solid var(--ink);
+  padding: 9px 11px;
+  margin-bottom: 7px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.1s;
+}
+.brow-item:hover { background: var(--ink); color: var(--bg); }
+.brow-item:hover .bim { color: var(--accent); }
+.bim { font-size: 0.5rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+.bit { font-size: 0.8rem; font-weight: 600; line-height: 1.3; }
+.bid { font-size: 0.68rem; color: var(--muted); flex-shrink: 0; }
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 50px; left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 7px 14px;
+  z-index: 800;
+  opacity: 0;
+  transition: all 0.2s;
+  white-space: nowrap;
+  pointer-events: none;
+  border: 1.5px solid var(--ink);
+}
+#toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.hr { height: 1px; background: var(--ink); opacity: 0.12; margin: 14px 0; }
+</style>
 </head>
-<body class="dark-theme">
+<body>
 
-    <!-- Global Progress Bar -->
-    <div id="progress-container">
-        <div id="main-progress-bar"></div>
+<!-- HUD -->
+<div id="hud">
+  <span id="logo">UPSC Flow</span>
+  <div class="hud-right">
+    <div class="hud-stat" onclick="open_('stats')">XP <span class="v" id="xv">0</span></div>
+    <div class="hud-stat">🔥 <span class="v" id="sv">1</span></div>
+    <button class="hud-btn" onclick="open_('create')">+ New</button>
+  </div>
+</div>
+
+<div id="prog"></div>
+
+<!-- Feed -->
+<div id="feed"></div>
+
+<!-- Empty State -->
+<div id="empty">
+  <div class="erule"></div>
+  <div class="etitle">No cards yet.</div>
+  <p class="esub">Create your first revision card. Everything lives on your device — no account needed.</p>
+  <button class="ecta" onclick="open_('create')">Create first card</button>
+</div>
+
+<!-- Bottom Bar -->
+<div id="bar">
+  <button class="bb" onclick="open_('create')">＋ Create</button>
+  <button class="bb" onclick="open_('upload')">↑ Upload</button>
+  <button class="bb" onclick="open_('browse')">≡ Browse</button>
+  <button class="bb" onclick="open_('stats')">◎ Stats</button>
+</div>
+
+<!-- XP Flash -->
+<div id="xpf"></div>
+<div id="toast"></div>
+
+<!-- ── CREATE ─────────────── -->
+<div class="ov" id="ov-create" onclick="oc(event,'create')">
+  <div class="sheet">
+    <div class="shd">
+      <span class="sht">New Card</span>
+      <button class="shc" onclick="close_('create')">Close</button>
     </div>
+    <div class="sbody">
+      <div class="ttog">
+        <button class="topt on" id="t-concept" onclick="stype('concept')">Concept</button>
+        <button class="topt" id="t-mcq" onclick="stype('mcq')">MCQ</button>
+      </div>
 
-    <!-- Floating HUD -->
-    <div id="hud">
-        <div class="stat-pill" onclick="toggleDashboard()">
-            <i data-lucide="zap" class="icon-xp"></i>
-            <span id="xp-display">0</span> XP
+      <div class="fld">
+        <label>Subject</label>
+        <select id="c-sub">
+          <option>History</option><option>Polity</option><option>Geography</option>
+          <option>Economy</option><option>Science &amp; Tech</option>
+          <option>Current Affairs</option><option>Other</option>
+        </select>
+      </div>
+
+      <!-- Concept -->
+      <div id="fc">
+        <div class="fld"><label>Title / Topic</label><input type="text" id="c-ti" placeholder="e.g. Battle of Buxar"></div>
+        <div class="fld"><label>Explanation</label><textarea id="c-tx" rows="4" placeholder="Write your explanation..."></textarea></div>
+        <div class="fld"><label>Key Facts — one per line (optional)</label><textarea id="c-fa" rows="3" placeholder="Fact 1&#10;Fact 2&#10;Fact 3"></textarea></div>
+      </div>
+
+      <!-- MCQ -->
+      <div id="fm" style="display:none">
+        <div class="fld"><label>Question</label><textarea id="m-q" rows="3" placeholder="Enter question..."></textarea></div>
+        <div class="fld">
+          <label>Options</label>
+          <div class="orow"><span class="olb">A</span><input type="text" id="m-0" placeholder="Option A"></div>
+          <div class="orow"><span class="olb">B</span><input type="text" id="m-1" placeholder="Option B"></div>
+          <div class="orow"><span class="olb">C</span><input type="text" id="m-2" placeholder="Option C"></div>
+          <div class="orow"><span class="olb">D</span><input type="text" id="m-3" placeholder="Option D"></div>
         </div>
-        <div class="stat-pill">
-            <i data-lucide="flame" class="icon-streak"></i>
-            <span id="streak-display">1</span>
+        <div class="fld">
+          <label>Correct Answer</label>
+          <select id="m-c"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
         </div>
-        <!-- New: Create Post Button -->
-        <div class="stat-pill action-btn" onclick="toggleCreateModal()">
-            <i data-lucide="plus-circle"></i> Create
-        </div>
+        <div class="fld"><label>Explanation (shown after answer)</label><textarea id="m-e" rows="2" placeholder="Why is this correct?"></textarea></div>
+      </div>
+
+      <button class="sbtn" onclick="createCard()">Publish Card — +20 XP</button>
     </div>
+  </div>
+</div>
 
-    <!-- Main Feed -->
-    <main id="feed-container"></main>
-
-    <!-- Dashboard Overlay -->
-    <div id="dashboard" class="hidden overlay">
-        <div class="glass-panel">
-            <button class="close-btn" onclick="toggleDashboard()"><i data-lucide="x"></i></button>
-            <h2>Aspirant Stats</h2>
-            <div class="rank-card">
-                <p>Rank: <strong id="rank-name">Beginner</strong></p>
-                <div class="level-bar-bg"><div id="level-progress"></div></div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box"><h3 id="stat-history">0</h3><p>History</p></div>
-                <div class="stat-box"><h3 id="stat-polity">0</h3><p>Polity</p></div>
-                <div class="stat-box"><h3 id="stat-geo">0</h3><p>Geography</p></div>
-            </div>
-            <button class="reset-btn" onclick="resetProgress()">Reset Journey</button>
-        </div>
+<!-- ── UPLOAD ─────────────── -->
+<div class="ov" id="ov-upload" onclick="oc(event,'upload')">
+  <div class="sheet">
+    <div class="shd">
+      <span class="sht">Upload Image</span>
+      <button class="shc" onclick="close_('upload')">Close</button>
     </div>
-
-    <!-- New: Create Custom Post Modal -->
-    <div id="create-modal" class="hidden overlay">
-        <div class="glass-panel create-form-panel">
-            <button class="close-btn" onclick="toggleCreateModal()"><i data-lucide="x"></i></button>
-            <h2>Create Custom Post</h2>
-            
-            <form id="create-post-form" onsubmit="handleCreatePost(event)">
-                <div class="form-group">
-                    <label>Post Type</label>
-                    <select id="new-post-type" onchange="switchFormType()" class="glass-input">
-                        <option value="concept">Micro Concept</option>
-                        <option value="mcq">MCQ Quiz</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Subject</label>
-                    <select id="new-subject" class="glass-input">
-                        <option value="History">History</option>
-                        <option value="Polity">Polity</option>
-                        <option value="Geography">Geography</option>
-                        <option value="Economy">Economy</option>
-                        <option value="Current Affairs">Current Affairs</option>
-                    </select>
-                </div>
-
-                <!-- Concept Fields -->
-                <div id="concept-fields">
-                    <div class="form-group">
-                        <label>Title</label>
-                        <input type="text" id="new-title" class="glass-input" placeholder="e.g. Battle of Buxar">
-                    </div>
-                    <div class="form-group">
-                        <label>Explanation</label>
-                        <textarea id="new-text" class="glass-input" rows="3" placeholder="Briefly explain the concept..."></textarea>
-                    </div>
-                </div>
-
-                <!-- MCQ Fields (Hidden by default) -->
-                <div id="mcq-fields" class="hidden">
-                    <div class="form-group">
-                        <label>Question</label>
-                        <textarea id="new-q" class="glass-input" rows="2" placeholder="Enter your question..."></textarea>
-                    </div>
-                    <div class="form-group options-inputs">
-                        <input type="text" id="opt-0" class="glass-input" placeholder="Option 1 (A)">
-                        <input type="text" id="opt-1" class="glass-input" placeholder="Option 2 (B)">
-                        <input type="text" id="opt-2" class="glass-input" placeholder="Option 3 (C)">
-                        <input type="text" id="opt-3" class="glass-input" placeholder="Option 4 (D)">
-                    </div>
-                    <div class="form-group">
-                        <label>Correct Option</label>
-                        <select id="new-correct" class="glass-input">
-                            <option value="0">Option 1 (A)</option>
-                            <option value="1">Option 2 (B)</option>
-                            <option value="2">Option 3 (C)</option>
-                            <option value="3">Option 4 (D)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Explanation (Shown after answering)</label>
-                        <textarea id="new-exp" class="glass-input" rows="2" placeholder="Why is this correct?"></textarea>
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-btn">Publish to Feed</button>
-            </form>
-        </div>
+    <div class="sbody">
+      <p style="font-size:0.7rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Photo of notes, diagrams, book pages. Add a title and notes to complete the card. Earns +30 XP.</p>
+      <div class="uz" onclick="document.getElementById('fi').click()" id="uz">
+        <input type="file" id="fi" accept="image/*" onchange="onFile(event)">
+        <span class="ui">⊕</span>Tap to select image
+      </div>
+      <img id="uprev" src="" alt="">
+      <div class="fld">
+        <label>Subject</label>
+        <select id="u-sub">
+          <option>History</option><option>Polity</option><option>Geography</option>
+          <option>Economy</option><option>Science &amp; Tech</option>
+          <option>Current Affairs</option><option>Other</option>
+        </select>
+      </div>
+      <div class="fld"><label>Title / Caption</label><input type="text" id="u-ti" placeholder="e.g. Mughal succession chart"></div>
+      <div class="fld"><label>Notes (optional)</label><textarea id="u-no" rows="3" placeholder="Key points, context..."></textarea></div>
+      <button class="sbtn" onclick="uploadCard()">Save Card — +30 XP</button>
     </div>
+  </div>
+</div>
 
-    <!-- XP Popup Notification -->
-    <div id="xp-popup">+10 XP</div>
+<!-- ── BROWSE ─────────────── -->
+<div class="ov" id="ov-browse" onclick="oc(event,'browse')">
+  <div class="sheet">
+    <div class="shd">
+      <span class="sht">All Cards</span>
+      <button class="shc" onclick="close_('browse')">Close</button>
+    </div>
+    <div class="sbody">
+      <div class="brow">
+        <button class="bchip on" data-s="All" onclick="sf(this)">All</button>
+        <button class="bchip" data-s="History" onclick="sf(this)">Hist</button>
+        <button class="bchip" data-s="Polity" onclick="sf(this)">Poli</button>
+        <button class="bchip" data-s="Geography" onclick="sf(this)">Geo</button>
+        <button class="bchip" data-s="Economy" onclick="sf(this)">Econ</button>
+        <button class="bchip" data-s="Other" onclick="sf(this)">Other</button>
+      </div>
+      <div id="blist"></div>
+    </div>
+  </div>
+</div>
 
-    <script src="script.js"></script>
-    <script>lucide.createIcons();</script>
+<!-- ── STATS ──────────────── -->
+<div class="ov" id="ov-stats" onclick="oc(event,'stats')">
+  <div class="sheet">
+    <div class="shd">
+      <span class="sht">Stats</span>
+      <button class="shc" onclick="close_('stats')">Close</button>
+    </div>
+    <div class="sbody">
+      <div style="margin-bottom:6px">
+        <div style="font-size:0.56rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px">Rank</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="rname" id="rname">—</div>
+          <div style="font-size:1.8rem" id="ric">🎓</div>
+        </div>
+      </div>
+      <div class="rbg"><div id="rbar" style="width:0%"></div></div>
+      <div style="font-size:0.58rem;color:var(--muted);margin-bottom:14px" id="rhint"></div>
+
+      <div class="stile">
+        <div><div class="sv" id="sxp">0</div><div class="sl">Total XP</div></div>
+        <div style="text-align:right"><div class="sv" id="sstr">1</div><div class="sl">Day Streak 🔥</div></div>
+      </div>
+      <div class="stile">
+        <div><div class="sv" id="scrd">0</div><div class="sl">Cards Created</div></div>
+        <div style="text-align:right"><div class="sv" id="srev">0</div><div class="sl">Revisions</div></div>
+      </div>
+      <div class="stile">
+        <div><div class="sv" id="sco">0</div><div class="sl">MCQs Correct</div></div>
+        <div style="text-align:right"><div class="sv" id="sup">0</div><div class="sl">Uploads</div></div>
+      </div>
+      <div class="hr"></div>
+      <button class="dbtn" onclick="doReset()">Reset all data</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STORAGE ──────────────────────────────
+const SK = 'upscflow2';
+
+const RANKS = [
+  {name:'Aspirant',    icon:'🎓', min:0},
+  {name:'Dedicated',   icon:'📚', min:100},
+  {name:'Serious',     icon:'⚡', min:300},
+  {name:'Prelims Ready',icon:'🎯', min:600},
+  {name:'Mains Ready', icon:'🏆', min:1200},
+  {name:'IAS Officer', icon:'👑', min:2500},
+];
+
+function load() {
+  try { const r = localStorage.getItem(SK); if(r) return JSON.parse(r); } catch(e){}
+  return { xp:0, streak:1, lastLogin:null, cards:[], revisions:0, correct:0, uploads:0 };
+}
+
+function save() { localStorage.setItem(SK, JSON.stringify(S)); }
+
+let S = load();
+let ctype = 'concept';
+let bfilter = 'All';
+let imgData = null;
+
+// ── INIT ─────────────────────────────────
+(function init() {
+  const today = new Date().toDateString();
+  if (S.lastLogin && S.lastLogin !== today) {
+    const diff = (Date.now() - new Date(S.lastLogin)) / 864e5;
+    S.streak = diff > 1.5 ? 1 : S.streak + 1;
+  }
+  S.lastLogin = today;
+  save();
+  renderFeed();
+  updateHUD();
+})();
+
+// ── FEED ─────────────────────────────────
+function renderFeed() {
+  const feed = document.getElementById('feed');
+  const empty = document.getElementById('empty');
+  if (!S.cards.length) {
+    feed.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+  feed.innerHTML = '';
+  S.cards.forEach((card, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.appendChild(card.type === 'mcq' ? buildMCQ(card, i, S.cards.length) : buildConcept(card, i, S.cards.length));
+    feed.appendChild(wrap);
+  });
+  feed.onscroll = () => {
+    const s = feed.scrollTop, h = feed.scrollHeight - feed.clientHeight;
+    document.getElementById('prog').style.width = (h > 0 ? (s/h)*100 : 0) + '%';
+  };
+}
+
+function buildConcept(c, i, tot) {
+  const box = document.createElement('div');
+  box.className = 'cbox';
+  const factsHtml = (c.facts||[]).filter(f=>f.trim()).map(f=>`<div class="fact">${esc(f)}</div>`).join('');
+  box.innerHTML = `
+    ${c.image ? `<img class="cimg" src="${c.image}" alt="">` : ''}
+    <div class="cstrip"><span class="tag">${esc(c.subject)}</span><span class="num">${i+1} / ${tot}</span></div>
+    <div class="cbody">
+      <div class="ctitle">${esc(c.title)}</div>
+      ${c.text ? `<div class="ctext">${esc(c.text)}</div>` : ''}
+      ${factsHtml ? `<div class="facts">${factsHtml}</div>` : ''}
+    </div>
+    <div class="nsec">
+      <div class="nlbl">My Notes</div>
+      <textarea class="narea" placeholder="Add notes..." onblur="saveNote(this,'${c.id}')">${esc(c.note||'')}</textarea>
+    </div>
+    <div class="cfooter">
+      <span class="fl">${c.type === 'upload' ? '↑ Upload' : '✎ Concept'} · ${fmtDate(c.at)}</span>
+      <div class="fr">
+        <button class="ibtn rev" onclick="doRevise('${c.id}')">Revised +5 XP</button>
+        <button class="ibtn del" onclick="delCard('${c.id}')">✕</button>
+      </div>
+    </div>`;
+  return box;
+}
+
+function buildMCQ(c, i, tot) {
+  const box = document.createElement('div');
+  box.className = 'cbox';
+  const lbls = ['A','B','C','D'];
+  const opts = c.options.map((o,j)=>
+    `<button class="opt" onclick="doOpt(this,${j},${c.correct},'exp-${c.id}')"><span class="ol">${lbls[j]}</span>${esc(o)}</button>`
+  ).join('');
+  box.innerHTML = `
+    <div class="cstrip"><span class="tag">${esc(c.subject)} · MCQ</span><span class="num">${i+1} / ${tot}</span></div>
+    <div class="cbody">
+      <div class="mcq-q">${esc(c.q)}</div>
+      <div class="opts">${opts}</div>
+      <div class="exp" id="exp-${c.id}">${esc(c.exp||'')}</div>
+    </div>
+    <div class="nsec">
+      <div class="nlbl">My Notes</div>
+      <textarea class="narea" placeholder="Add notes..." onblur="saveNote(this,'${c.id}')">${esc(c.note||'')}</textarea>
+    </div>
+    <div class="cfooter">
+      <span class="fl">✎ MCQ · ${fmtDate(c.at)}</span>
+      <div class="fr"><button class="ibtn del" onclick="delCard('${c.id}')">✕</button></div>
+    </div>`;
+  return box;
+}
+
+// ── INTERACTIONS ─────────────────────────
+function doOpt(btn, chosen, correct, expId) {
+  const opts = btn.closest('.opts');
+  if (opts.dataset.done) return;
+  opts.dataset.done = '1';
+  opts.querySelectorAll('.opt').forEach(b => b.disabled = true);
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    S.correct++;
+    addXP(20, '+20 XP');
+    toast('✓ Correct!');
+    if (navigator.vibrate) navigator.vibrate(60);
+  } else {
+    btn.classList.add('wrong');
+    opts.querySelectorAll('.opt')[correct].classList.add('correct');
+    toast('✗ Incorrect.');
+    if (navigator.vibrate) navigator.vibrate([50,30,50]);
+  }
+  const exp = document.getElementById(expId);
+  if (exp && exp.textContent.trim()) exp.classList.add('show');
+  save();
+}
+
+function doRevise(id) { S.revisions++; addXP(5, '+5 XP'); toast('Marked revised!'); }
+
+function saveNote(ta, id) {
+  const c = S.cards.find(c => c.id === id);
+  if (c) { c.note = ta.value; save(); }
+}
+
+function delCard(id) {
+  if (!confirm('Delete this card?')) return;
+  S.cards = S.cards.filter(c => c.id !== id);
+  save(); renderFeed(); toast('Card deleted.');
+}
+
+// ── CREATE ───────────────────────────────
+function stype(t) {
+  ctype = t;
+  document.getElementById('t-concept').classList.toggle('on', t === 'concept');
+  document.getElementById('t-mcq').classList.toggle('on', t === 'mcq');
+  document.getElementById('fc').style.display = t === 'concept' ? 'block' : 'none';
+  document.getElementById('fm').style.display = t === 'mcq' ? 'block' : 'none';
+}
+
+function createCard() {
+  const sub = document.getElementById('c-sub').value;
+  if (ctype === 'concept') {
+    const ti = v('c-ti'), tx = v('c-tx'), fa = v('c-fa');
+    if (!ti) return toast('⚠ Title required.');
+    S.cards.push({ id:uid(), type:'concept', subject:sub, title:ti, text:tx,
+      facts: fa ? fa.split('\n').filter(f=>f.trim()) : [], note:'', at: new Date().toISOString() });
+    ['c-ti','c-tx','c-fa'].forEach(id => document.getElementById(id).value = '');
+  } else {
+    const q = v('m-q'), opts = [0,1,2,3].map(i => v('m-'+i)), cor = +v('m-c'), exp = v('m-e');
+    if (!q || opts.some(o => !o)) return toast('⚠ Fill all fields.');
+    S.cards.push({ id:uid(), type:'mcq', subject:sub, q, options:opts, correct:cor, exp, note:'', at: new Date().toISOString() });
+    ['m-q','m-0','m-1','m-2','m-3','m-e'].forEach(id => document.getElementById(id).value = '');
+  }
+  save(); addXP(20, '+20 XP'); toast('Card created!'); close_('create'); renderFeed();
+}
+
+// ── UPLOAD ───────────────────────────────
+function onFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    imgData = ev.target.result;
+    const prev = document.getElementById('uprev');
+    prev.src = imgData; prev.style.display = 'block';
+    document.getElementById('uz').style.display = 'none';
+  };
+  r.readAsDataURL(f);
+}
+
+function uploadCard() {
+  if (!imgData) return toast('⚠ Select an image first.');
+  const ti = v('u-ti') || 'Untitled Upload';
+  const sub = document.getElementById('u-sub').value;
+  const no = v('u-no');
+  S.cards.push({ id:uid(), type:'upload', subject:sub, title:ti, text:'', image:imgData,
+    facts:[], note:no, at: new Date().toISOString() });
+  S.uploads++;
+  imgData = null;
+  document.getElementById('uprev').style.display = 'none';
+  document.getElementById('uz').style.display = 'block';
+  document.getElementById('fi').value = '';
+  ['u-ti','u-no'].forEach(id => document.getElementById(id).value = '');
+  save(); addXP(30, '+30 XP'); toast('Image card saved!'); close_('upload'); renderFeed();
+}
+
+// ── BROWSE ───────────────────────────────
+function sf(chip) {
+  document.querySelectorAll('.bchip').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+  bfilter = chip.dataset.s;
+  renderBrowse();
+}
+
+function renderBrowse() {
+  const list = document.getElementById('blist');
+  const cards = bfilter === 'All' ? S.cards : S.cards.filter(c => c.subject === bfilter);
+  if (!cards.length) { list.innerHTML = `<div style="text-align:center;padding:20px;font-size:0.72rem;color:var(--muted)">No cards here yet.</div>`; return; }
+  list.innerHTML = cards.map(c => `
+    <div class="brow-item" onclick="jumpTo('${c.id}')">
+      <div>
+        <div class="bim">${c.subject} · ${c.type.toUpperCase()}</div>
+        <div class="bit">${esc(c.type === 'mcq' ? c.q.slice(0,60) + (c.q.length > 60 ? '…' : '') : c.title)}</div>
+      </div>
+      <div class="bid">${fmtDate(c.at)}</div>
+    </div>`).join('');
+}
+
+function jumpTo(id) {
+  close_('browse');
+  const idx = S.cards.findIndex(c => c.id === id);
+  if (idx < 0) return;
+  renderFeed();
+  setTimeout(() => {
+    const cards = document.getElementById('feed').querySelectorAll('.card');
+    if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth' });
+  }, 80);
+}
+
+// ── STATS ────────────────────────────────
+function updateStats() {
+  document.getElementById('sxp').textContent = S.xp;
+  document.getElementById('sstr').textContent = S.streak;
+  document.getElementById('scrd').textContent = S.cards.length;
+  document.getElementById('srev').textContent = S.revisions;
+  document.getElementById('sco').textContent = S.correct;
+  document.getElementById('sup').textContent = S.uploads;
+
+  let rank = RANKS[0];
+  for (const r of RANKS) if (S.xp >= r.min) rank = r;
+  document.getElementById('rname').textContent = rank.name;
+  document.getElementById('ric').textContent = rank.icon;
+
+  const ri = RANKS.indexOf(rank);
+  const next = RANKS[ri + 1];
+  if (next) {
+    const pct = ((S.xp - rank.min) / (next.min - rank.min)) * 100;
+    document.getElementById('rbar').style.width = Math.min(pct, 100) + '%';
+    document.getElementById('rhint').textContent = `${S.xp - rank.min} / ${next.min - rank.min} XP to ${next.name}`;
+  } else {
+    document.getElementById('rbar').style.width = '100%';
+    document.getElementById('rhint').textContent = 'Maximum rank reached.';
+  }
+}
+
+function doReset() {
+  if (confirm('Delete ALL cards and reset XP? Cannot be undone.')) { localStorage.removeItem(SK); location.reload(); }
+}
+
+// ── XP ───────────────────────────────────
+function addXP(n, lbl) {
+  S.xp += n; save(); updateHUD();
+  const el = document.getElementById('xpf');
+  el.textContent = lbl;
+  el.classList.remove('xpa');
+  void el.offsetWidth;
+  el.classList.add('xpa');
+}
+
+function updateHUD() {
+  document.getElementById('xv').textContent = S.xp;
+  document.getElementById('sv').textContent = S.streak;
+}
+
+// ── OVERLAYS ─────────────────────────────
+function open_(n) {
+  document.getElementById('ov-'+n).classList.add('open');
+  if (n === 'stats') updateStats();
+  if (n === 'browse') renderBrowse();
+}
+function close_(n) { document.getElementById('ov-'+n).classList.remove('open'); }
+function oc(e, n) { if (e.target === document.getElementById('ov-'+n)) close_(n); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') ['create','upload','browse','stats'].forEach(n => close_(n));
+});
+
+// ── UTILS ────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+function v(id) { return document.getElementById(id).value.trim(); }
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('on'), 2200);
+}
+</script>
 </body>
 </html>
