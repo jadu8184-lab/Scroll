@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UPSC Flow | Gamified Learning</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+
+    <!-- Global Progress Bar -->
+    <div id="progress-container">
+        <div id="main-progress-bar"></div>
+    </div>
+
+    <!-- Floating HUD -->
+    <div id="hud">
+        <div class="stat-pill" onclick="toggleDashboard()">
+            <i data-lucide="zap" class="icon-xp"></i>
+            <span id="xp-display">0</span> XP
+        </div>
+        <div class="stat-pill">
+            <i data-lucide="flame" class="icon-streak"></i>
+            <span id="streak-display">1</span>
+        </div>
+        <!-- New: Create Post Button -->
+        <div class="stat-pill action-btn" onclick="toggleCreateModal()">
+            <i data-lucide="plus-circle"></i> Create
+        </div>
+    </div>
+
+    <!-- Main Feed -->
+    <main id="feed-container"></main>
+
+    <!-- Dashboard Overlay -->
+    <div id="dashboard" class="hidden overlay">
+        <div class="glass-panel">
+            <button class="close-btn" onclick="toggleDashboard()"><i data-lucide="x"></i></button>
+            <h2>Aspirant Stats</h2>
+            <div class="rank-card">
+                <p>Rank: <strong id="rank-name">Beginner</strong></p>
+                <div class="level-bar-bg"><div id="level-progress"></div></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box"><h3 id="stat-history">0</h3><p>History</p></div>
+                <div class="stat-box"><h3 id="stat-polity">0</h3><p>Polity</p></div>
+                <div class="stat-box"><h3 id="stat-geo">0</h3><p>Geography</p></div>
+            </div>
+            <button class="reset-btn" onclick="resetProgress()">Reset Journey</button>
+        </div>
+    </div>
+
+    <!-- New: Create Custom Post Modal -->
+    <div id="create-modal" class="hidden overlay">
+        <div class="glass-panel create-form-panel">
+            <button class="close-btn" onclick="toggleCreateModal()"><i data-lucide="x"></i></button>
+            <h2>Create Custom Post</h2>
+            
+            <form id="create-post-form" onsubmit="handleCreatePost(event)">
+                <div class="form-group">
+                    <label>Post Type</label>
+                    <select id="new-post-type" onchange="switchFormType()" class="glass-input">
+                        <option value="concept">Micro Concept</option>
+                        <option value="mcq">MCQ Quiz</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select id="new-subject" class="glass-input">
+                        <option value="History">History</option>
+                        <option value="Polity">Polity</option>
+                        <option value="Geography">Geography</option>
+                        <option value="Economy">Economy</option>
+                        <option value="Current Affairs">Current Affairs</option>
+                    </select>
+                </div>
+
+                <!-- Concept Fields -->
+                <div id="concept-fields">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="new-title" class="glass-input" placeholder="e.g. Battle of Buxar">
+                    </div>
+                    <div class="form-group">
+                        <label>Explanation</label>
+                        <textarea id="new-text" class="glass-input" rows="3" placeholder="Briefly explain the concept..."></textarea>
+                    </div>
+                </div>
+
+                <!-- MCQ Fields (Hidden by default) -->
+                <div id="mcq-fields" class="hidden">
+                    <div class="form-group">
+                        <label>Question</label>
+                        <textarea id="new-q" class="glass-input" rows="2" placeholder="Enter your question..."></textarea>
+                    </div>
+                    <div class="form-group options-inputs">
+                        <input type="text" id="opt-0" class="glass-input" placeholder="Option 1 (A)">
+                        <input type="text" id="opt-1" class="glass-input" placeholder="Option 2 (B)">
+                        <input type="text" id="opt-2" class="glass-input" placeholder="Option 3 (C)">
+                        <input type="text" id="opt-3" class="glass-input" placeholder="Option 4 (D)">
+                    </div>
+                    <div class="form-group">
+                        <label>Correct Option</label>
+                        <select id="new-correct" class="glass-input">
+                            <option value="0">Option 1 (A)</option>
+                            <option value="1">Option 2 (B)</option>
+                            <option value="2">Option 3 (C)</option>
+                            <option value="3">Option 4 (D)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Explanation (Shown after answering)</label>
+                        <textarea id="new-exp" class="glass-input" rows="2" placeholder="Why is this correct?"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Publish to Feed</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- XP Popup Notification -->
+    <div id="xp-popup">+10 XP</div>
+
+    <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
