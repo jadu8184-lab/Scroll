@@ -1,1354 +1,850 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>UPSC FLOW</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #f5f2eb;
-  --ink: #0d0d0d;
-  --ink2: #3a3a3a;
-  --muted: #888;
-  --accent: #c8f500;
-  --red: #e03030;
-  --mono: 'IBM Plex Mono', monospace;
-  --display: 'Barlow Condensed', sans-serif;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Command</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  <style>
+    /* ─── GLOBAL STYLES & GLASSMORPHISM ─── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+      font-family: 'Inter', sans-serif; 
+      /* Elegant dark gradient background */
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      background-attachment: fixed;
+      color: #ffffff; 
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    ::-webkit-scrollbar { width: 0; } /* Hide scrollbar for clean look */
 
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--mono);
-  height: 100dvh;
-  overflow: hidden;
-}
+    .app-container {
+      max-width: 430px;
+      margin: 0 auto;
+      position: relative;
+      padding-bottom: 90px;
+    }
 
-/* ── HUD ─────────────────────────── */
-#hud {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 48px;
-  background: var(--ink);
-  color: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
-  z-index: 200;
-}
+    /* Core Glass Panel */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
 
-#logo {
-  font-family: var(--display);
-  font-weight: 900;
-  font-size: 1.15rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
+    /* Glass Inputs */
+    .glass-input {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      width: 100%;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .glass-input:focus {
+      background: rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    .glass-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .glass-input option { background: #203a43; color: #fff; }
 
-.hud-right { display: flex; align-items: center; gap: 12px; }
+    /* Glass Buttons */
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      letter-spacing: 0.05em;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+    .glass-btn:hover { background: rgba(255, 255, 255, 0.15); }
+    .glass-btn:active { transform: scale(0.98); }
+    .glass-btn.primary {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #bae6fd;
+    }
+    .glass-btn.success {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #bbf7d0;
+    }
 
-.hud-stat {
-  font-size: 0.68rem;
-  font-weight: 500;
-  opacity: 0.8;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 4px;
-}
-.hud-stat .v { color: var(--accent); font-weight: 600; font-size: 0.78rem; }
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: rgba(15, 32, 39, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px 24px 0 0;
+      display: flex;
+      z-index: 100;
+      padding: 12px 8px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+    }
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.4);
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: relative;
+    }
+    .tab-btn.active {
+      color: #fff;
+    }
+    .tab-btn span.icon { font-size: 22px; margin-bottom: 2px; }
 
-.hud-btn {
-  background: var(--accent);
-  color: var(--ink);
-  border: none;
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 0.68rem;
-  padding: 5px 12px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.hud-btn:active { opacity: 0.8; }
+    /* Progress Bars */
+    .progress-track {
+      height: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.8), rgba(167, 139, 250, 0.8));
+      border-radius: 8px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-/* ── PROGRESS ────────────────────── */
-#prog {
-  position: fixed;
-  top: 48px; left: 0;
-  height: 2px;
-  background: var(--accent);
-  width: 0%;
-  z-index: 199;
-  transition: width 0.3s;
-}
+    /* Cards */
+    .card-flip { perspective: 1000px; height: 100%; }
+    .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .card-inner.flipped { transform: rotateY(180deg); }
+    .card-face { 
+      position: absolute; 
+      width: 100%; 
+      height: 100%; 
+      backface-visibility: hidden; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 32px; 
+      border-radius: 20px;
+      text-align: center;
+    }
+    .card-back { transform: rotateY(180deg); }
+    .swipe-card { touch-action: pan-y; user-select: none; }
 
-/* ── FEED ────────────────────────── */
-#feed {
-  position: fixed;
-  top: 50px; left: 0; right: 0; bottom: 44px;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-}
-#feed::-webkit-scrollbar { display: none; }
-
-/* ── BOTTOM BAR ──────────────────── */
-#bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 44px;
-  background: var(--bg);
-  border-top: 2px solid var(--ink);
-  display: flex;
-  z-index: 200;
-}
-
-.bb {
-  flex: 1;
-  background: none;
-  border: none;
-  border-right: 1px solid var(--ink);
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  cursor: pointer;
-  color: var(--ink2);
-  transition: background 0.12s, color 0.12s;
-}
-.bb:last-child { border-right: none; }
-.bb:hover { background: var(--ink); color: var(--bg); }
-.bb:active { background: var(--accent); color: var(--ink); }
-
-/* ── CARDS ───────────────────────── */
-.card {
-  height: calc(100dvh - 94px);
-  width: 100%;
-  scroll-snap-align: start;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-}
-.card:nth-child(even) { background: #eceae1; }
-
-.cbox {
-  width: 100%;
-  max-width: 500px;
-  border: 2px solid var(--ink);
-  background: #fff;
-  animation: cIn 0.22s ease-out;
-  max-height: calc(100dvh - 122px);
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-.cbox::-webkit-scrollbar { display: none; }
-
-@keyframes cIn {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.cstrip {
-  background: var(--ink);
-  color: var(--bg);
-  padding: 5px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-.cstrip .tag { color: var(--accent); }
-.cstrip .num { opacity: 0.4; font-size: 0.58rem; }
-
-.cbody { padding: 18px 16px 12px; }
-
-.ctitle {
-  font-family: var(--display);
-  font-size: 1.9rem;
-  font-weight: 900;
-  line-height: 1.05;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-  margin-bottom: 10px;
-  word-break: break-word;
-}
-
-.ctext {
-  font-size: 0.8rem;
-  line-height: 1.7;
-  color: var(--ink2);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.facts {
-  margin-top: 10px;
-  border-top: 1px solid #e8e8e8;
-  padding-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.fact {
-  font-size: 0.73rem;
-  color: var(--ink2);
-  padding-left: 14px;
-  position: relative;
-  line-height: 1.4;
-}
-.fact::before { content: '→'; position: absolute; left: 0; font-weight: 600; color: var(--ink); }
-
-.cimg {
-  width: 100%;
-  max-height: 180px;
-  object-fit: cover;
-  border-bottom: 2px solid var(--ink);
-  display: block;
-}
-
-/* MCQ */
-.mcq-q {
-  font-size: 0.87rem;
-  font-weight: 600;
-  line-height: 1.5;
-  margin-bottom: 12px;
-}
-
-.opts { display: flex; flex-direction: column; gap: 7px; }
-
-.opt {
-  width: 100%;
-  background: none;
-  border: 1.5px solid var(--ink);
-  font-family: var(--mono);
-  font-size: 0.76rem;
-  padding: 9px 11px;
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  line-height: 1.4;
-  color: var(--ink);
-  transition: background 0.1s, color 0.1s;
-}
-.opt:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
-.opt .ol { font-weight: 600; flex-shrink: 0; font-size: 0.68rem; min-width: 14px; }
-.opt.correct { background: var(--accent) !important; border-color: var(--ink); color: var(--ink) !important; }
-.opt.wrong { background: var(--red) !important; border-color: var(--red); color: #fff !important; }
-.opt:disabled { cursor: not-allowed; }
-
-.exp {
-  margin-top: 10px;
-  font-size: 0.72rem;
-  line-height: 1.55;
-  color: var(--ink2);
-  border-left: 3px solid var(--accent);
-  padding: 7px 10px;
-  display: none;
-}
-.exp.show { display: block; }
-
-/* Notes */
-.nsec {
-  border-top: 1px dashed #c8c8c8;
-  padding: 10px 16px;
-}
-.nlbl {
-  font-size: 0.56rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 5px;
-}
-.narea {
-  width: 100%;
-  min-height: 48px;
-  background: #fefce8;
-  border: 1px solid #d4c97a;
-  font-family: var(--mono);
-  font-size: 0.74rem;
-  line-height: 1.5;
-  padding: 7px 9px;
-  resize: none;
-  color: var(--ink);
-  outline: none;
-}
-.narea:focus { border-color: var(--ink); }
-
-/* Footer */
-.cfooter {
-  border-top: 1px solid #e8e8e8;
-  padding: 7px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fafafa;
-}
-.fl { font-size: 0.58rem; color: var(--muted); }
-.fr { display: flex; gap: 6px; }
-
-.ibtn {
-  background: none;
-  border: 1px solid #ccc;
-  font-size: 0.62rem;
-  padding: 4px 8px;
-  cursor: pointer;
-  font-family: var(--mono);
-  color: var(--ink2);
-  transition: all 0.1s;
-}
-.ibtn:hover { border-color: var(--ink); background: var(--ink); color: var(--bg); }
-.ibtn.del:hover { background: var(--red); border-color: var(--red); color: #fff; }
-.ibtn.rev:hover { background: var(--accent); border-color: var(--ink); color: var(--ink); }
-
-/* XP Flash */
-#xpf {
-  position: fixed;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--display);
-  font-size: 3.5rem;
-  font-weight: 900;
-  color: var(--accent);
-  text-shadow: 3px 3px 0 var(--ink);
-  pointer-events: none;
-  opacity: 0;
-  z-index: 900;
-}
-@keyframes xpP {
-  0%   { opacity: 0; transform: translate(-50%,-40%) scale(0.5); }
-  30%  { opacity: 1; transform: translate(-50%,-60%) scale(1.1); }
-  80%  { opacity: 1; transform: translate(-50%,-70%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%,-90%) scale(0.9); }
-}
-.xpa { animation: xpP 0.85s cubic-bezier(0.16,1,0.3,1) forwards; }
-
-/* ── EMPTY STATE ─────────────────── */
-#empty {
-  position: fixed;
-  top: 50px; left: 0; right: 0; bottom: 44px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  z-index: 10;
-  padding: 24px;
-  text-align: center;
-}
-.erule { width: 48px; height: 4px; background: var(--ink); margin-bottom: 18px; }
-.etitle {
-  font-family: var(--display);
-  font-size: 2.8rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  margin-bottom: 10px;
-}
-.esub { font-size: 0.73rem; color: var(--muted); max-width: 240px; line-height: 1.6; margin-bottom: 22px; }
-.ecta {
-  background: var(--ink);
-  color: var(--bg);
-  border: 2px solid var(--ink);
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 0.78rem;
-  padding: 11px 22px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-.ecta:hover { background: var(--accent); color: var(--ink); }
-
-/* ── OVERLAY / SHEET ─────────────── */
-.ov {
-  position: fixed;
-  inset: 0;
-  background: rgba(13,13,13,0.65);
-  z-index: 500;
-  display: none;
-  align-items: flex-end;
-  justify-content: center;
-}
-.ov.open { display: flex; }
-
-.sheet {
-  width: 100%;
-  max-width: 560px;
-  max-height: 92dvh;
-  background: var(--bg);
-  border-top: 3px solid var(--ink);
-  overflow-y: auto;
-  scrollbar-width: none;
-  animation: su 0.22s cubic-bezier(0.16,1,0.3,1);
-}
-.sheet::-webkit-scrollbar { display: none; }
-@keyframes su { from { transform: translateY(28px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-.shd {
-  background: var(--ink);
-  color: var(--bg);
-  padding: 13px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.sht {
-  font-family: var(--display);
-  font-size: 1.05rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.shc {
-  background: none;
-  border: 1px solid rgba(255,255,255,0.25);
-  color: var(--bg);
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  padding: 4px 10px;
-  cursor: pointer;
-}
-.shc:hover { background: rgba(255,255,255,0.1); }
-
-.sbody { padding: 16px; }
-
-/* Form */
-.fld { margin-bottom: 13px; }
-.fld label {
-  display: block;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 5px;
-}
-.fld input, .fld textarea, .fld select {
-  width: 100%;
-  background: #fff;
-  border: 1.5px solid var(--ink);
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  padding: 9px 10px;
-  color: var(--ink);
-  outline: none;
-  resize: vertical;
-  appearance: none;
-}
-.fld input:focus, .fld textarea:focus, .fld select:focus {
-  border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--ink);
-}
-
-/* Type toggle */
-.ttog {
-  display: flex;
-  border: 1.5px solid var(--ink);
-  overflow: hidden;
-  margin-bottom: 13px;
-}
-.topt {
-  flex: 1;
-  padding: 9px;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  border: none;
-  border-right: 1px solid var(--ink);
-  background: #fff;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.1s;
-}
-.topt:last-child { border-right: none; }
-.topt.on { background: var(--ink); color: var(--accent); }
-
-/* Upload zone */
-.uz {
-  border: 2px dashed var(--ink);
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 0.7rem;
-  color: var(--muted);
-  background: #fff;
-  margin-bottom: 10px;
-  transition: all 0.12s;
-}
-.uz:hover { border-color: var(--accent); }
-.uz .ui { font-size: 1.7rem; display: block; margin-bottom: 6px; }
-.uz input { display: none; }
-#uprev { width: 100%; max-height: 120px; object-fit: cover; border: 1.5px solid var(--ink); display: none; margin-bottom: 10px; }
-
-/* Opt inputs */
-.orow { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
-.olb { font-size: 0.64rem; font-weight: 600; width: 18px; flex-shrink: 0; color: var(--muted); }
-
-/* Submit */
-.sbtn {
-  width: 100%;
-  background: var(--ink);
-  color: var(--bg);
-  border: 2px solid var(--ink);
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 0.76rem;
-  padding: 11px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 4px;
-  transition: all 0.12s;
-}
-.sbtn:hover { background: var(--accent); color: var(--ink); }
-
-/* Stats */
-.stile {
-  border: 1.5px solid var(--ink);
-  padding: 12px 14px;
-  margin-bottom: 9px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.sv { font-family: var(--display); font-size: 2rem; font-weight: 900; line-height: 1; }
-.sl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-
-.rbg { height: 6px; border: 1px solid var(--ink); background: #fff; margin: 10px 0 4px; overflow: hidden; }
-#rbar { height: 100%; background: var(--accent); transition: width 0.5s; }
-
-.rname { font-family: var(--display); font-size: 1.5rem; font-weight: 900; text-transform: uppercase; }
-
-.dbtn {
-  width: 100%;
-  padding: 10px;
-  background: none;
-  border: 1.5px solid var(--red);
-  color: var(--red);
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  margin-top: 8px;
-}
-.dbtn:hover { background: var(--red); color: #fff; }
-
-/* Browse */
-.brow {
-  display: flex;
-  border: 1.5px solid var(--ink);
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-.bchip {
-  flex: 1;
-  padding: 7px 4px;
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border: none;
-  border-right: 1px solid var(--ink);
-  background: #fff;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.1s;
-}
-.bchip:last-child { border-right: none; }
-.bchip.on { background: var(--ink); color: var(--accent); }
-
-.brow-item {
-  border: 1.5px solid var(--ink);
-  padding: 9px 11px;
-  margin-bottom: 7px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  transition: background 0.1s;
-}
-.brow-item:hover { background: var(--ink); color: var(--bg); }
-.brow-item:hover .bim { color: var(--accent); }
-.bim { font-size: 0.5rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
-.bit { font-size: 0.8rem; font-weight: 600; line-height: 1.3; }
-.bid { font-size: 0.68rem; color: var(--muted); flex-shrink: 0; }
-
-/* Toast */
-#toast {
-  position: fixed;
-  bottom: 50px; left: 50%;
-  transform: translateX(-50%) translateY(6px);
-  background: var(--ink);
-  color: var(--bg);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 7px 14px;
-  z-index: 800;
-  opacity: 0;
-  transition: all 0.2s;
-  white-space: nowrap;
-  pointer-events: none;
-  border: 1.5px solid var(--ink);
-}
-#toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-.hr { height: 1px; background: var(--ink); opacity: 0.12; margin: 14px 0; }
-
-/* ── FAB ─────────────────────────── */
-#fab-container {
-  position: fixed;
-  bottom: 60px;
-  right: 20px;
-  z-index: 250;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-  pointer-events: none; /* Safely prevents invisible blocking */
-}
-
-#fab-menu {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
-}
-
-#fab-menu.open {
-  pointer-events: auto; /* Re-enables interaction when open */
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fab-item {
-  background: #fff;
-  border: 2px solid var(--ink);
-  color: var(--ink);
-  padding: 8px 14px;
-  border-radius: 24px;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.1s;
-  box-shadow: 2px 2px 0 var(--ink);
-}
-.fab-item:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
-
-#fab {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--ink);
-  color: var(--ink);
-  font-size: 1.8rem;
-  font-weight: 400;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), background 0.1s;
-  box-shadow: 3px 3px 0 var(--ink);
-  padding-bottom: 2px;
-  pointer-events: auto; /* Always clickable */
-}
-#fab:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
-#fab.rot { transform: rotate(45deg); background: var(--ink); color: var(--bg); box-shadow: 3px 3px 0 var(--accent); }
-#fab.rot:active { transform: rotate(45deg) translate(3px, 3px); box-shadow: 0 0 0 var(--accent); }
-
-/* NotebookLM Sync Styling */
-.nb-info {
-  background: rgba(200,245,0,0.15);
-  border: 1px solid var(--accent);
-  padding: 10px;
-  font-size: 0.7rem;
-  line-height: 1.5;
-  color: var(--ink);
-  margin-bottom: 14px;
-}
-</style>
+    /* Typography & Utilities */
+    .title-gradient {
+      background: linear-gradient(to right, #e0f2fe, #7dd3fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+    .subtitle {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .stat-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
+  <div id="root"></div>
 
-<!-- HUD -->
-<div id="hud">
-  <span id="logo">UPSC Flow</span>
-  <div class="hud-right">
-    <div class="hud-stat" onclick="open_('stats')">XP <span class="v" id="xv">0</span></div>
-    <div class="hud-stat">🔥 <span class="v" id="sv">1</span></div>
-    <button class="hud-btn" onclick="open_('create')">+ New</button>
-  </div>
-</div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
 
-<div id="prog"></div>
+    // ─── CONSTANTS ───────────────────────────────────────────────────────────────
+    const TARGET_DATE = new Date("2026-05-24T00:00:00");
+    const SUBJECTS = ["History", "Geography", "Polity", "Economy", "Science", "Environment", "CSAT", "Current Affairs"];
+    const INTENSITY_TAGS = [
+      { id: "active_recall", label: "Active Recall", color: "239, 68, 68" }, // rgb values for rgba integration
+      { id: "practice_qs", label: "Practice Qs", color: "249, 115, 22" },
+      { id: "note_taking", label: "Note Taking", color: "234, 179, 8" },
+      { id: "passive_read", label: "Passive Read", color: "59, 130, 246" },
+      { id: "revision", label: "Revision", color: "139, 92, 246" },
+    ];
+    const DAILY_GOAL = 8;
+    const COUNTER_OFFENSIVE_GOAL = 10;
+    const RETREAT_WINDOW_HOURS = 48;
 
-<!-- Feed -->
-<div id="feed"></div>
+    // ─── INITIAL STATE ────────────────────────────────────────────────────────────
+    const getInitialState = () => {
+      try {
+        const saved = localStorage.getItem("studycommand_v2");
+        if (saved) return JSON.parse(saved);
+      } catch {}
+      return {
+        sessions: [],
+        streak: 0,
+        longestStreak: 0,
+        tacticalRetreat: null,
+        tokens: [],
+        tokenHistory: [],
+        flashcards: [
+          { id: 1, front: "What is the Preamble of the Indian Constitution?", back: "We, the People of India, having solemnly resolved to constitute India into a Sovereign Socialist Secular Democratic Republic...", subject: "Polity", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
+          { id: 2, front: "Name the Five Permanent Members of the UN Security Council", back: "USA, UK, France, Russia, China — collectively known as P5", subject: "History", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
+          { id: 3, front: "What is the Tropic of Cancer?", back: "Latitude 23.5°N — passes through Rajasthan, Gujarat, MP, Chhattisgarh, Jharkhand, West Bengal, Tripura, Mizoram in India", subject: "Geography", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
+        ],
+        lastAwardCheck: null,
+      };
+    };
 
-<!-- Empty State -->
-<div id="empty">
-  <div class="erule"></div>
-  <div class="etitle">No cards yet.</div>
-  <p class="esub">Create your first revision card. Everything lives on your device — no account needed.</p>
-  <button class="ecta" onclick="open_('create')">Create first card</button>
-</div>
+    // ─── SPACED REPETITION (SM-2) ────────────────────────────────────────────────
+    const sm2 = (card, quality) => {
+      const ef = Math.max(1.3, card.easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+      const interval = quality < 3 ? 1 : quality === 3 ? 1 : Math.round(card.interval * ef);
+      return {
+        ...card,
+        easeFactor: ef,
+        interval,
+        nextReview: Date.now() + interval * 24 * 60 * 60 * 1000,
+        reviewed: true,
+      };
+    };
 
-<!-- Bottom Bar -->
-<div id="bar">
-  <button class="bb" onclick="open_('create')">＋ Create</button>
-  <button class="bb" onclick="open_('upload')">↑ Upload</button>
-  <button class="bb" onclick="open_('browse')">≡ Browse</button>
-  <button class="bb" onclick="open_('stats')">◎ Stats</button>
-</div>
+    // ─── TIME HELPERS ─────────────────────────────────────────────────────────────
+    const todayKey = () => new Date().toISOString().slice(0, 10);
+    const getTodaySessions = (sessions) => sessions.filter(s => s.date === todayKey());
+    const getTodayHours = (sessions) => getTodaySessions(sessions).reduce((a, s) => a + s.hours, 0);
+    const formatCountdown = (ms) => {
+      if (ms <= 0) return { d: "00", h: "00", m: "00", s: "00" };
+      const s = Math.floor(ms / 1000) % 60;
+      const m = Math.floor(ms / 60000) % 60;
+      const h = Math.floor(ms / 3600000) % 24;
+      const d = Math.floor(ms / 86400000);
+      return { d: String(d).padStart(2, "0"), h: String(h).padStart(2, "0"), m: String(m).padStart(2, "0"), s: String(s).padStart(2, "0") };
+    };
 
-<!-- FAB Container -->
-<div id="fab-container">
-  <div id="fab-menu">
-    <button class="fab-item" onclick="openFab('sync')">NotebookLM Sync</button>
-    <button class="fab-item" onclick="openFab('upload')">Upload Image</button>
-    <button class="fab-item" onclick="openFab('mcq')">Quiz (MCQ)</button>
-    <button class="fab-item" onclick="openFab('concept')">Concept</button>
-  </div>
-  <button id="fab" onclick="toggleFab()">＋</button>
-</div>
+    // ─── MAIN APP COMPONENT ───────────────────────────────────────────────────────
+    function App() {
+      const [state, setState] = useState(getInitialState);
+      const [tab, setTab] = useState("clock");
+      const [now, setNow] = useState(Date.now());
 
-<!-- XP Flash -->
-<div id="xpf"></div>
-<div id="toast"></div>
+      useEffect(() => {
+        try { localStorage.setItem("studycommand_v2", JSON.stringify(state)); } catch {}
+      }, [state]);
 
-<!-- ── NOTEBOOK LM SYNC ────────────── -->
-<div class="ov" id="ov-sync" onclick="oc(event,'sync')">
-  <div class="sheet">
-    <div class="shd">
-      <span class="sht">NotebookLM Importer</span>
-      <button class="shc" onclick="close_('sync')">Close</button>
-    </div>
-    <div class="sbody">
-      <div class="nb-info">
-        <b>No API? No Problem.</b> Google hasn't released a NotebookLM API yet. To import cards, use the prompt below to make NotebookLM generate JSON, then paste it here.
-      </div>
-      
-      <button class="sbtn" style="margin-bottom:14px; background:#fff; color:var(--ink)" onclick="copyNLPrompt()">1. Copy Prompt for NotebookLM</button>
-      
-      <div class="fld">
-        <label>2. Paste JSON Output</label>
-        <textarea id="nl-json" rows="6" placeholder="Paste the [{...}] array generated by NotebookLM here..."></textarea>
-      </div>
-      
-      <button class="sbtn" onclick="importNLCards()">3. Import Cards</button>
-    </div>
-  </div>
-</div>
+      useEffect(() => {
+        const id = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(id);
+      }, []);
 
-<!-- ── CREATE ─────────────── -->
-<div class="ov" id="ov-create" onclick="oc(event,'create')">
-  <div class="sheet">
-    <div class="shd">
-      <span class="sht">New Card</span>
-      <button class="shc" onclick="close_('create')">Close</button>
-    </div>
-    <div class="sbody">
-      <div class="ttog">
-        <button class="topt on" id="t-concept" onclick="stype('concept')">Concept</button>
-        <button class="topt" id="t-mcq" onclick="stype('mcq')">MCQ</button>
-      </div>
+      useEffect(() => {
+        const today = todayKey();
+        if (state.lastAwardCheck === today) return;
+        const todayHours = getTodayHours(state.sessions);
+        const newTokens = [];
 
-      <div class="fld">
-        <label>Subject</label>
-        <select id="c-sub">
-          <option>History</option><option>Polity</option><option>Geography</option>
-          <option>Economy</option><option>Science &amp; Tech</option>
-          <option>Current Affairs</option><option>Other</option>
-        </select>
-      </div>
+        if (todayHours >= DAILY_GOAL) {
+          const alreadyAwarded = state.tokens.some(t => t.type === "daily" && t.date === today) ||
+            state.tokenHistory.some(t => t.type === "daily" && t.date === today);
+          if (!alreadyAwarded) {
+            newTokens.push({ id: Date.now() + 1, type: "daily", label: "1-Hour Break", emoji: "📺", date: today, spent: false });
+            newTokens.push({ id: Date.now() + 2, type: "daily2", label: "2-Hour Leisure", emoji: "🎮", date: today, spent: false });
+          }
+        }
+        if (state.streak >= 7 && state.streak % 7 === 0) {
+          const weekKey = Math.floor(state.streak / 7);
+          const alreadyAwarded = state.tokens.some(t => t.type === "weekly" && t.weekKey === weekKey) ||
+            state.tokenHistory.some(t => t.type === "weekly" && t.weekKey === weekKey);
+          if (!alreadyAwarded) newTokens.push({ id: Date.now() + 3, type: "weekly", label: "Special Meal", emoji: "🍽️", date: today, weekKey, spent: false });
+        }
+        if (state.streak >= 30 && state.streak % 30 === 0) {
+          const monthKey = Math.floor(state.streak / 30);
+          const alreadyAwarded = state.tokens.some(t => t.type === "monthly" && t.monthKey === monthKey) ||
+            state.tokenHistory.some(t => t.type === "monthly" && t.monthKey === monthKey);
+          if (!alreadyAwarded) newTokens.push({ id: Date.now() + 4, type: "monthly", label: "Movie/Event Pass", emoji: "🎬", date: today, monthKey, spent: false });
+        }
 
-      <!-- Concept -->
-      <div id="fc">
-        <div class="fld"><label>Title / Topic</label><input type="text" id="c-ti" placeholder="e.g. Battle of Buxar"></div>
-        <div class="fld"><label>Explanation</label><textarea id="c-tx" rows="4" placeholder="Write your explanation..."></textarea></div>
-        <div class="fld"><label>Key Facts — one per line (optional)</label><textarea id="c-fa" rows="3" placeholder="Fact 1&#10;Fact 2&#10;Fact 3"></textarea></div>
-      </div>
+        if (newTokens.length > 0) {
+          setState(s => ({ ...s, tokens: [...s.tokens, ...newTokens], lastAwardCheck: today }));
+        } else {
+          setState(s => ({ ...s, lastAwardCheck: today }));
+        }
+      }, [state.streak, state.sessions]);
 
-      <!-- MCQ -->
-      <div id="fm" style="display:none">
-        <div class="fld"><label>Question</label><textarea id="m-q" rows="3" placeholder="Enter question..."></textarea></div>
-        <div class="fld">
-          <label>Options</label>
-          <div class="orow"><span class="olb">A</span><input type="text" id="m-0" placeholder="Option A"></div>
-          <div class="orow"><span class="olb">B</span><input type="text" id="m-1" placeholder="Option B"></div>
-          <div class="orow"><span class="olb">C</span><input type="text" id="m-2" placeholder="Option C"></div>
-          <div class="orow"><span class="olb">D</span><input type="text" id="m-3" placeholder="Option D"></div>
-        </div>
-        <div class="fld">
-          <label>Correct Answer</label>
-          <select id="m-c"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
-        </div>
-        <div class="fld"><label>Explanation (shown after answer)</label><textarea id="m-e" rows="2" placeholder="Why is this correct?"></textarea></div>
-      </div>
+      const msLeft = Math.max(0, TARGET_DATE - now);
+      const countdown = formatCountdown(msLeft);
+      const todayHours = getTodayHours(state.sessions);
+      const unspentTokens = state.tokens.filter(t => !t.spent);
 
-      <button class="sbtn" onclick="createCard()">Publish Card — +20 XP</button>
-    </div>
-  </div>
-</div>
+      const addSession = useCallback((subject, hours, intensity) => {
+        setState(s => {
+          const newSessions = [...s.sessions, { id: Date.now(), date: todayKey(), subject, hours, intensity, ts: Date.now() }];
+          const newTodayHours = newSessions.filter(x => x.date === todayKey()).reduce((a, x) => a + x.hours, 0);
+          let { streak, longestStreak, tacticalRetreat } = s;
 
-<!-- ── UPLOAD ─────────────── -->
-<div class="ov" id="ov-upload" onclick="oc(event,'upload')">
-  <div class="sheet">
-    <div class="shd">
-      <span class="sht">Upload Image</span>
-      <button class="shc" onclick="close_('upload')">Close</button>
-    </div>
-    <div class="sbody">
-      <p style="font-size:0.7rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Photo of notes, diagrams, book pages. Add a title and notes to complete the card. Earns +30 XP.</p>
-      <div class="uz" onclick="document.getElementById('fi').click()" id="uz">
-        <input type="file" id="fi" accept="image/*" onchange="onFile(event)">
-        <span class="ui">⊕</span>Tap to select image
-      </div>
-      <img id="uprev" src="" alt="">
-      <div class="fld">
-        <label>Subject</label>
-        <select id="u-sub">
-          <option>History</option><option>Polity</option><option>Geography</option>
-          <option>Economy</option><option>Science &amp; Tech</option>
-          <option>Current Affairs</option><option>Other</option>
-        </select>
-      </div>
-      <div class="fld"><label>Title / Caption</label><input type="text" id="u-ti" placeholder="e.g. Mughal succession chart"></div>
-      <div class="fld"><label>Notes (optional)</label><textarea id="u-no" rows="3" placeholder="Key points, context..."></textarea></div>
-      <button class="sbtn" onclick="uploadCard()">Save Card — +30 XP</button>
-    </div>
-  </div>
-</div>
+          if (newTodayHours >= DAILY_GOAL && s.sessions.filter(x => x.date === todayKey()).reduce((a, x) => a + x.hours, 0) < DAILY_GOAL) {
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            const yk = yesterday.toISOString().slice(0, 10);
+            const yesterdayHours = s.sessions.filter(x => x.date === yk).reduce((a, x) => a + x.hours, 0);
+            if (yesterdayHours >= DAILY_GOAL || streak === 0) {
+              streak += 1;
+              longestStreak = Math.max(streak, longestStreak);
+              tacticalRetreat = null;
+            }
+          }
 
-<!-- ── BROWSE ─────────────── -->
-<div class="ov" id="ov-browse" onclick="oc(event,'browse')">
-  <div class="sheet">
-    <div class="shd">
-      <span class="sht">All Cards</span>
-      <button class="shc" onclick="close_('browse')">Close</button>
-    </div>
-    <div class="sbody">
-      <div class="brow">
-        <button class="bchip on" data-s="All" onclick="sf(this)">All</button>
-        <button class="bchip" data-s="History" onclick="sf(this)">Hist</button>
-        <button class="bchip" data-s="Polity" onclick="sf(this)">Poli</button>
-        <button class="bchip" data-s="Geography" onclick="sf(this)">Geo</button>
-        <button class="bchip" data-s="Economy" onclick="sf(this)">Econ</button>
-        <button class="bchip" data-s="Other" onclick="sf(this)">Other</button>
-      </div>
-      <div id="blist"></div>
-    </div>
-  </div>
-</div>
+          if (tacticalRetreat && newTodayHours >= COUNTER_OFFENSIVE_GOAL) {
+            const windowOk = (Date.now() - tacticalRetreat.startedAt) < RETREAT_WINDOW_HOURS * 3600000;
+            if (windowOk) {
+              streak = tacticalRetreat.streakBefore + 1;
+              longestStreak = Math.max(streak, longestStreak);
+              tacticalRetreat = null;
+            }
+          }
 
-<!-- ── STATS ──────────────── -->
-<div class="ov" id="ov-stats" onclick="oc(event,'stats')">
-  <div class="sheet">
-    <div class="shd">
-      <span class="sht">Stats</span>
-      <button class="shc" onclick="close_('stats')">Close</button>
-    </div>
-    <div class="sbody">
-      <div style="margin-bottom:6px">
-        <div style="font-size:0.56rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px">Rank</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div class="rname" id="rname">—</div>
-          <div style="font-size:1.8rem" id="ric">🎓</div>
-        </div>
-      </div>
-      <div class="rbg"><div id="rbar" style="width:0%"></div></div>
-      <div style="font-size:0.58rem;color:var(--muted);margin-bottom:14px" id="rhint"></div>
-
-      <div class="stile">
-        <div><div class="sv" id="sxp">0</div><div class="sl">Total XP</div></div>
-        <div style="text-align:right"><div class="sv" id="sstr">1</div><div class="sl">Day Streak 🔥</div></div>
-      </div>
-      <div class="stile">
-        <div><div class="sv" id="scrd">0</div><div class="sl">Cards Created</div></div>
-        <div style="text-align:right"><div class="sv" id="srev">0</div><div class="sl">Revisions</div></div>
-      </div>
-      <div class="stile">
-        <div><div class="sv" id="sco">0</div><div class="sl">MCQs Correct</div></div>
-        <div style="text-align:right"><div class="sv" id="sup">0</div><div class="sl">Uploads</div></div>
-      </div>
-      <div class="hr"></div>
-      <button class="dbtn" onclick="doReset()">Reset all data</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── STORAGE ──────────────────────────────
-const SK = 'upscflow2';
-
-const RANKS = [
-  {name:'Aspirant',    icon:'🎓', min:0},
-  {name:'Dedicated',   icon:'📚', min:100},
-  {name:'Serious',     icon:'⚡', min:300},
-  {name:'Prelims Ready',icon:'🎯', min:600},
-  {name:'Mains Ready', icon:'🏆', min:1200},
-  {name:'IAS Officer', icon:'👑', min:2500},
-];
-
-function load() {
-  try { 
-    const r = localStorage.getItem(SK); 
-    if(r) {
-      const parsed = JSON.parse(r);
-      // Hardened check to prevent fatal crashes from corrupted null saves
-      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.cards)) {
-        return parsed;
-      }
-    }
-  } catch(e){ console.error("Storage load error, resetting context", e); }
-  return { xp:0, streak:1, lastLogin:null, cards:[], revisions:0, correct:0, uploads:0 };
-}
-
-function save() { localStorage.setItem(SK, JSON.stringify(S)); }
-
-let S = load();
-let ctype = 'concept';
-let bfilter = 'All';
-let imgData = null;
-
-// ── INIT ─────────────────────────────────
-(function init() {
-  const today = new Date().toDateString();
-  if (S.lastLogin && S.lastLogin !== today) {
-    const diff = (Date.now() - new Date(S.lastLogin)) / 864e5;
-    S.streak = diff > 1.5 ? 1 : S.streak + 1;
-  }
-  S.lastLogin = today;
-  save();
-  renderFeed();
-  updateHUD();
-})();
-
-// ── FEED ─────────────────────────────────
-function renderFeed() {
-  const feed = document.getElementById('feed');
-  const empty = document.getElementById('empty');
-  if (!S.cards || !S.cards.length) {
-    feed.innerHTML = '';
-    empty.style.display = 'flex';
-    return;
-  }
-  empty.style.display = 'none';
-  feed.innerHTML = '';
-  S.cards.forEach((card, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.appendChild(card.type === 'mcq' ? buildMCQ(card, i, S.cards.length) : buildConcept(card, i, S.cards.length));
-    feed.appendChild(wrap);
-  });
-  feed.onscroll = () => {
-    const s = feed.scrollTop, h = feed.scrollHeight - feed.clientHeight;
-    document.getElementById('prog').style.width = (h > 0 ? (s/h)*100 : 0) + '%';
-  };
-}
-
-function buildConcept(c, i, tot) {
-  const box = document.createElement('div');
-  box.className = 'cbox';
-  const factsHtml = (c.facts||[]).filter(f=>f.trim()).map(f=>`<div class="fact">${esc(f)}</div>`).join('');
-  box.innerHTML = `
-    ${c.image ? `<img class="cimg" src="${c.image}" alt="">` : ''}
-    <div class="cstrip"><span class="tag">${esc(c.subject)}</span><span class="num">${i+1} / ${tot}</span></div>
-    <div class="cbody">
-      <div class="ctitle">${esc(c.title)}</div>
-      ${c.text ? `<div class="ctext">${esc(c.text)}</div>` : ''}
-      ${factsHtml ? `<div class="facts">${factsHtml}</div>` : ''}
-    </div>
-    <div class="nsec">
-      <div class="nlbl">My Notes</div>
-      <textarea class="narea" placeholder="Add notes..." onblur="saveNote(this,'${c.id}')">${esc(c.note||'')}</textarea>
-    </div>
-    <div class="cfooter">
-      <span class="fl">${c.type === 'upload' ? '↑ Upload' : '✎ Concept'} · ${fmtDate(c.at)}</span>
-      <div class="fr">
-        <button class="ibtn rev" onclick="doRevise('${c.id}')">Revised +5 XP</button>
-        <button class="ibtn del" onclick="delCard('${c.id}')">✕</button>
-      </div>
-    </div>`;
-  return box;
-}
-
-function buildMCQ(c, i, tot) {
-  const box = document.createElement('div');
-  box.className = 'cbox';
-  const lbls = ['A','B','C','D'];
-  const opts = c.options.map((o,j)=>
-    `<button class="opt" onclick="doOpt(this,${j},${c.correct},'exp-${c.id}')"><span class="ol">${lbls[j]}</span>${esc(o)}</button>`
-  ).join('');
-  box.innerHTML = `
-    <div class="cstrip"><span class="tag">${esc(c.subject)} · MCQ</span><span class="num">${i+1} / ${tot}</span></div>
-    <div class="cbody">
-      <div class="mcq-q">${esc(c.q)}</div>
-      <div class="opts">${opts}</div>
-      <div class="exp" id="exp-${c.id}">${esc(c.exp||'')}</div>
-    </div>
-    <div class="nsec">
-      <div class="nlbl">My Notes</div>
-      <textarea class="narea" placeholder="Add notes..." onblur="saveNote(this,'${c.id}')">${esc(c.note||'')}</textarea>
-    </div>
-    <div class="cfooter">
-      <span class="fl">✎ MCQ · ${fmtDate(c.at)}</span>
-      <div class="fr"><button class="ibtn del" onclick="delCard('${c.id}')">✕</button></div>
-    </div>`;
-  return box;
-}
-
-// ── INTERACTIONS ─────────────────────────
-function doOpt(btn, chosen, correct, expId) {
-  const opts = btn.closest('.opts');
-  if (opts.dataset.done) return;
-  opts.dataset.done = '1';
-  opts.querySelectorAll('.opt').forEach(b => b.disabled = true);
-  if (chosen === correct) {
-    btn.classList.add('correct');
-    S.correct++;
-    addXP(20, '+20 XP');
-    toast('✓ Correct!');
-    if (navigator.vibrate) navigator.vibrate(60);
-  } else {
-    btn.classList.add('wrong');
-    opts.querySelectorAll('.opt')[correct].classList.add('correct');
-    toast('✗ Incorrect.');
-    if (navigator.vibrate) navigator.vibrate([50,30,50]);
-  }
-  const exp = document.getElementById(expId);
-  if (exp && exp.textContent.trim()) exp.classList.add('show');
-  save();
-}
-
-function doRevise(id) { S.revisions++; addXP(5, '+5 XP'); toast('Marked revised!'); }
-
-function saveNote(ta, id) {
-  const c = S.cards.find(c => c.id === id);
-  if (c) { c.note = ta.value; save(); }
-}
-
-function delCard(id) {
-  if (!confirm('Delete this card?')) return;
-  S.cards = S.cards.filter(c => c.id !== id);
-  save(); renderFeed(); toast('Card deleted.');
-}
-
-// ── CREATE ───────────────────────────────
-function stype(t) {
-  ctype = t;
-  document.getElementById('t-concept').classList.toggle('on', t === 'concept');
-  document.getElementById('t-mcq').classList.toggle('on', t === 'mcq');
-  document.getElementById('fc').style.display = t === 'concept' ? 'block' : 'none';
-  document.getElementById('fm').style.display = t === 'mcq' ? 'block' : 'none';
-}
-
-function createCard() {
-  const sub = document.getElementById('c-sub').value;
-  if (ctype === 'concept') {
-    const ti = v('c-ti'), tx = v('c-tx'), fa = v('c-fa');
-    if (!ti) return toast('⚠ Title required.');
-    S.cards.push({ id:uid(), type:'concept', subject:sub, title:ti, text:tx,
-      facts: fa ? fa.split('\n').filter(f=>f.trim()) : [], note:'', at: new Date().toISOString() });
-    ['c-ti','c-tx','c-fa'].forEach(id => document.getElementById(id).value = '');
-  } else {
-    const q = v('m-q'), opts = [0,1,2,3].map(i => v('m-'+i)), cor = +v('m-c'), exp = v('m-e');
-    if (!q || opts.some(o => !o)) return toast('⚠ Fill all fields.');
-    S.cards.push({ id:uid(), type:'mcq', subject:sub, q, options:opts, correct:cor, exp, note:'', at: new Date().toISOString() });
-    ['m-q','m-0','m-1','m-2','m-3','m-e'].forEach(id => document.getElementById(id).value = '');
-  }
-  save(); addXP(20, '+20 XP'); toast('Card created!'); close_('create'); renderFeed();
-}
-
-// ── UPLOAD ───────────────────────────────
-function onFile(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    imgData = ev.target.result;
-    const prev = document.getElementById('uprev');
-    prev.src = imgData; prev.style.display = 'block';
-    document.getElementById('uz').style.display = 'none';
-  };
-  r.readAsDataURL(f);
-}
-
-function uploadCard() {
-  if (!imgData) return toast('⚠ Select an image first.');
-  const ti = v('u-ti') || 'Untitled Upload';
-  const sub = document.getElementById('u-sub').value;
-  const no = v('u-no');
-  S.cards.push({ id:uid(), type:'upload', subject:sub, title:ti, text:'', image:imgData,
-    facts:[], note:no, at: new Date().toISOString() });
-  S.uploads++;
-  imgData = null;
-  document.getElementById('uprev').style.display = 'none';
-  document.getElementById('uz').style.display = 'block';
-  document.getElementById('fi').value = '';
-  ['u-ti','u-no'].forEach(id => document.getElementById(id).value = '');
-  save(); addXP(30, '+30 XP'); toast('Image card saved!'); close_('upload'); renderFeed();
-}
-
-// ── BROWSE ───────────────────────────────
-function sf(chip) {
-  document.querySelectorAll('.bchip').forEach(c => c.classList.remove('on'));
-  chip.classList.add('on');
-  bfilter = chip.dataset.s;
-  renderBrowse();
-}
-
-function renderBrowse() {
-  const list = document.getElementById('blist');
-  const cards = bfilter === 'All' ? S.cards : S.cards.filter(c => c.subject === bfilter);
-  if (!cards.length) { list.innerHTML = `<div style="text-align:center;padding:20px;font-size:0.72rem;color:var(--muted)">No cards here yet.</div>`; return; }
-  list.innerHTML = cards.map(c => `
-    <div class="brow-item" onclick="jumpTo('${c.id}')">
-      <div>
-        <div class="bim">${c.subject} · ${c.type.toUpperCase()}</div>
-        <div class="bit">${esc(c.type === 'mcq' ? c.q.slice(0,60) + (c.q.length > 60 ? '…' : '') : c.title)}</div>
-      </div>
-      <div class="bid">${fmtDate(c.at)}</div>
-    </div>`).join('');
-}
-
-function jumpTo(id) {
-  close_('browse');
-  const idx = S.cards.findIndex(c => c.id === id);
-  if (idx < 0) return;
-  renderFeed();
-  setTimeout(() => {
-    const cards = document.getElementById('feed').querySelectorAll('.card');
-    if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth' });
-  }, 80);
-}
-
-// ── STATS ────────────────────────────────
-function updateStats() {
-  document.getElementById('sxp').textContent = S.xp;
-  document.getElementById('sstr').textContent = S.streak;
-  document.getElementById('scrd').textContent = S.cards.length;
-  document.getElementById('srev').textContent = S.revisions;
-  document.getElementById('sco').textContent = S.correct;
-  document.getElementById('sup').textContent = S.uploads;
-
-  let rank = RANKS[0];
-  for (const r of RANKS) if (S.xp >= r.min) rank = r;
-  document.getElementById('rname').textContent = rank.name;
-  document.getElementById('ric').textContent = rank.icon;
-
-  const ri = RANKS.indexOf(rank);
-  const next = RANKS[ri + 1];
-  if (next) {
-    const pct = ((S.xp - rank.min) / (next.min - rank.min)) * 100;
-    document.getElementById('rbar').style.width = Math.min(pct, 100) + '%';
-    document.getElementById('rhint').textContent = `${S.xp - rank.min} / ${next.min - rank.min} XP to ${next.name}`;
-  } else {
-    document.getElementById('rbar').style.width = '100%';
-    document.getElementById('rhint').textContent = 'Maximum rank reached.';
-  }
-}
-
-function doReset() {
-  if (confirm('Delete ALL cards and reset XP? Cannot be undone.')) { localStorage.removeItem(SK); location.reload(); }
-}
-
-// ── NOTEBOOK LM SYNC LOGIC ───────────────
-function copyNLPrompt() {
-  const p = `Act as an expert UPSC tutor. Create 3 MCQs and 2 Concept cards based on the documents I have provided. 
-
-Output STRICTLY as a valid JSON array with NO markdown blocks outside the array. Use this exact schema:
-
-[
-  {
-    "type": "mcq",
-    "subject": "History",
-    "q": "Question here?",
-    "options": ["Opt A", "Opt B", "Opt C", "Opt D"],
-    "correct": 0,
-    "exp": "Detailed explanation of the correct answer."
-  },
-  {
-    "type": "concept",
-    "subject": "Polity",
-    "title": "Main Topic Title",
-    "text": "Detailed explanation of the concept.",
-    "facts": ["Key Fact 1", "Key Fact 2"]
-  }
-]
-
-Valid subjects are: History, Polity, Geography, Economy, Science & Tech, Current Affairs, Other. Ensure the correct option index is an integer (0-3).`;
-
-  navigator.clipboard.writeText(p).then(() => {
-    toast('Prompt copied! Paste it into NotebookLM.');
-  }).catch(() => {
-    toast('Failed to copy. Check permissions.');
-  });
-}
-
-function importNLCards() {
-  let val = document.getElementById('nl-json').value.trim();
-  if (!val) return toast('⚠ Paste JSON first.');
-
-  try {
-    val = val.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
-    const arr = JSON.parse(val);
-    if (!Array.isArray(arr)) throw new Error('Root is not an array');
-    
-    let added = 0;
-    arr.forEach(c => {
-      if (c.type === 'mcq' || c.type === 'concept') {
-        S.cards.push({
-          id: uid(),
-          type: c.type,
-          subject: c.subject || 'Other',
-          title: c.title || '',
-          text: c.text || '',
-          q: c.q || '',
-          options: Array.isArray(c.options) && c.options.length === 4 ? c.options : ['A','B','C','D'],
-          correct: Number.isInteger(c.correct) ? c.correct : 0,
-          exp: c.exp || '',
-          facts: Array.isArray(c.facts) ? c.facts : [],
-          note: '',
-          at: new Date().toISOString()
+          return { ...s, sessions: newSessions, streak, longestStreak, tacticalRetreat };
         });
-        added++;
-      }
-    });
+      }, []);
 
-    if (added === 0) return toast('⚠ No valid cards found in JSON.');
-    
-    save();
-    renderFeed();
-    addXP(added * 10, `+${added * 10} XP`);
-    document.getElementById('nl-json').value = '';
-    close_('sync');
-    toast(`Successfully imported ${added} cards!`);
-    
-  } catch (err) {
-    console.error(err);
-    toast('⚠ Invalid JSON format. Please check the output.');
-  }
-}
+      const redeemToken = useCallback((id) => {
+        setState(s => {
+          const token = s.tokens.find(t => t.id === id);
+          if (!token) return s;
+          return {
+            ...s,
+            tokens: s.tokens.filter(t => t.id !== id),
+            tokenHistory: [...s.tokenHistory, { ...token, spent: true, redeemedAt: Date.now() }],
+          };
+        });
+      }, []);
 
-// ── XP ───────────────────────────────────
-function addXP(n, lbl) {
-  S.xp += n; save(); updateHUD();
-  const el = document.getElementById('xpf');
-  el.textContent = lbl;
-  el.classList.remove('xpa');
-  void el.offsetWidth;
-  el.classList.add('xpa');
-}
+      const updateFlashcard = useCallback((updated) => {
+        setState(s => ({ ...s, flashcards: s.flashcards.map(c => c.id === updated.id ? updated : c) }));
+      }, []);
 
-function updateHUD() {
-  document.getElementById('xv').textContent = S.xp;
-  document.getElementById('sv').textContent = S.streak;
-}
+      const addFlashcard = useCallback((card) => {
+        setState(s => ({ ...s, flashcards: [...s.flashcards, { ...card, id: Date.now(), interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false }] }));
+      }, []);
 
-// ── OVERLAYS ─────────────────────────────
-function open_(n) {
-  document.getElementById('ov-'+n).classList.add('open');
-  if (n === 'stats') updateStats();
-  if (n === 'browse') renderBrowse();
-}
-function close_(n) { document.getElementById('ov-'+n).classList.remove('open'); }
-function oc(e, n) { if (e.target === document.getElementById('ov-'+n)) close_(n); }
+      const importCSV = useCallback((text) => {
+        const lines = text.trim().split("\n").slice(1);
+        const cards = lines.map((line, i) => {
+          const [front, back, subject = "General"] = line.split(",").map(s => s.replace(/^"|"$/g, "").trim());
+          return { id: Date.now() + i, front, back, subject, type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false };
+        }).filter(c => c.front && c.back);
+        setState(s => ({ ...s, flashcards: [...s.flashcards, ...cards] }));
+        return cards.length;
+      }, []);
 
-// ── FAB LOGIC ────────────────────────────
-function toggleFab() {
-  const m = document.getElementById('fab-menu');
-  const f = document.getElementById('fab');
-  m.classList.toggle('open');
-  f.classList.toggle('rot');
-}
+      const TABS = [
+        { id: "clock", icon: "⏱", label: "Dashboard" },
+        { id: "log", icon: "📊", label: "Deploy" },
+        { id: "cards", icon: "🃏", label: "Intel" },
+        { id: "armory", icon: "🏆", label: "Rewards" },
+      ];
 
-function openFab(type) {
-  toggleFab();
-  if (type === 'upload') {
-    open_('upload');
-  } else if (type === 'mcq') {
-    open_('create');
-    stype('mcq');
-  } else if (type === 'concept') {
-    open_('create');
-    stype('concept');
-  } else if (type === 'sync') {
-    open_('sync');
-  }
-}
+      return (
+        <div className="app-container">
+          {tab === "clock" && <ClockView countdown={countdown} msLeft={msLeft} todayHours={todayHours} streak={state.streak} longestStreak={state.longestStreak} tacticalRetreat={state.tacticalRetreat} sessions={state.sessions} now={now} />}
+          {tab === "log" && <LogView addSession={addSession} sessions={state.sessions} todayHours={todayHours} tacticalRetreat={state.tacticalRetreat} />}
+          {tab === "cards" && <CardsView flashcards={state.flashcards} updateFlashcard={updateFlashcard} addFlashcard={addFlashcard} importCSV={importCSV} />}
+          {tab === "armory" && <ArmoryView tokens={unspentTokens} tokenHistory={state.tokenHistory} redeemToken={redeemToken} streak={state.streak} />}
 
-// Close FAB menu safely if tapped outside
-document.addEventListener('click', e => {
-  const fc = document.getElementById('fab-container');
-  const m = document.getElementById('fab-menu');
-  if (fc && m && m.classList.contains('open') && !fc.contains(e.target)) {
-    toggleFab();
-  }
-});
+          <div className="bottom-nav">
+            {TABS.map(t => (
+              <button key={t.id} className={`tab-btn ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>
+                <span className="icon">{t.icon}</span>
+                {t.label}
+                {t.id === "armory" && unspentTokens.length > 0 && (
+                  <span style={{ position: "absolute", top: 4, right: 18, background: "#38bdf8", color: "#0f2027", borderRadius: "50%", width: 14, height: 14, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>{unspentTokens.length}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    ['create','upload','browse','stats','sync'].forEach(n => close_(n));
-    const m = document.getElementById('fab-menu');
-    if (m && m.classList.contains('open')) toggleFab();
-  }
-});
+    // ─── DASHBOARD (CLOCK) VIEW ───────────────────────────────────────────────────
+    function ClockView({ countdown, msLeft, todayHours, streak, longestStreak, tacticalRetreat, sessions, now }) {
+      const progress = Math.min(1, todayHours / DAILY_GOAL);
+      const daysElapsed = Math.floor((now - new Date("2025-06-01")) / 86400000);
+      const totalDays = Math.floor((TARGET_DATE - new Date("2025-06-01")) / 86400000);
+      const campaignProgress = Math.max(0, Math.min(1, daysElapsed / totalDays));
 
-// ── UTILS ────────────────────────────────
-function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
-function v(id) { return document.getElementById(id).value.trim(); }
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function fmtDate(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
-}
+      const todaySubs = {};
+      sessions.filter(s => s.date === todayKey()).forEach(s => {
+        todaySubs[s.subject] = (todaySubs[s.subject] || 0) + s.hours;
+      });
 
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('on');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('on'), 2200);
-}
-</script>
+      return (
+        <div style={{ padding: "24px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+            <div>
+              <div className="subtitle">Study Command</div>
+              <div className="title-gradient" style={{ fontSize: 20 }}>OPERATION: UPSC</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div className="subtitle">Streak</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: streak >= 7 ? "#38bdf8" : "#fff" }}>🔥 {streak}</div>
+            </div>
+          </div>
+
+          {tacticalRetreat && (
+            <div className="glass-panel" style={{ borderLeft: "4px solid #ef4444" }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <span style={{ fontSize: 24 }}>⚠️</span>
+                <div>
+                  <div style={{ fontSize: 11, color: "#fca5a5", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Tactical Retreat Active</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>Log {COUNTER_OFFENSIVE_GOAL}h today for Counter-Offensive to restore streak.</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="glass-panel" style={{ textAlign: "center", padding: "30px 20px" }}>
+            <div className="subtitle" style={{ marginBottom: 20 }}>
+              {msLeft > 0 ? "Countdown to Prelims" : "Campaign Complete"}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              {[["d", "Days"], ["h", "Hrs"], ["m", "Min"], ["s", "Sec"]].map(([k, label]) => (
+                <div key={k}>
+                  <div style={{ fontSize: 32, fontWeight: 800, color: "#fff", textShadow: "0 2px 10px rgba(255,255,255,0.2)" }}>{countdown[k]}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 6, textTransform: "uppercase", fontWeight: 600 }}>{label}</div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="progress-track" style={{ marginTop: 24 }}>
+              <div className="progress-fill" style={{ width: `${campaignProgress * 100}%` }} />
+            </div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 8 }}>
+              {Math.round(campaignProgress * 100)}% of timeline elapsed
+            </div>
+          </div>
+
+          <div className="glass-panel">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div className="subtitle" style={{ margin: 0 }}>Today's Deployment</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: todayHours >= DAILY_GOAL ? "#4ade80" : "#fff" }}>
+                {todayHours.toFixed(1)}h / {DAILY_GOAL}h
+              </div>
+            </div>
+            
+            <div className="progress-track" style={{ marginBottom: 16 }}>
+              <div className="progress-fill" style={{ width: `${progress * 100}%`, background: todayHours >= DAILY_GOAL ? "rgba(74, 222, 128, 0.8)" : "" }} />
+            </div>
+
+            {Object.keys(todaySubs).length > 0 ? (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {Object.entries(todaySubs).map(([sub, hrs]) => (
+                  <div key={sub} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "6px 12px", fontSize: 11, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
+                    {sub} <span style={{ color: "#38bdf8", fontWeight: 700, marginLeft: 4 }}>{hrs}h</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", textAlign: "center", padding: "10px 0" }}>No deployment logged today.</div>
+            )}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {[
+              { label: "Best Streak", value: `${longestStreak} d`, icon: "🏆" },
+              { label: "Total Sessions", value: sessions.length, icon: "📋" },
+              { label: "Total Hours", value: `${sessions.reduce((a, s) => a + s.hours, 0).toFixed(0)}h`, icon: "⏱" },
+              { label: "Days Left", value: countdown.d, icon: "📅" },
+            ].map(stat => (
+              <div key={stat.label} className="stat-box">
+                <div style={{ fontSize: 18, marginBottom: 8 }}>{stat.icon}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{stat.value}</div>
+                <div className="subtitle" style={{ margin: 0 }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── DEPLOY (LOG) VIEW ────────────────────────────────────────────────────────
+    function LogView({ addSession, sessions, todayHours, tacticalRetreat }) {
+      const [subject, setSubject] = useState(SUBJECTS[0]);
+      const [hours, setHours] = useState(1);
+      const [intensity, setIntensity] = useState(INTENSITY_TAGS[0].id);
+      const [success, setSuccess] = useState(false);
+
+      const handleAdd = () => {
+        if (hours <= 0 || hours > 16) return;
+        addSession(subject, parseFloat(hours), intensity);
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 2000);
+      };
+
+      const recentSessions = [...sessions].reverse().slice(0, 20);
+      const goalNeeded = tacticalRetreat ? COUNTER_OFFENSIVE_GOAL : DAILY_GOAL;
+      const remaining = Math.max(0, goalNeeded - todayHours);
+
+      return (
+        <div style={{ padding: "24px 16px" }}>
+          <div className="subtitle">Resource Allocation</div>
+          <div className="title-gradient" style={{ fontSize: 20, marginBottom: 20 }}>DEPLOY HOURS</div>
+
+          <div className="glass-panel">
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: 10 }}>
+              <span>TODAY: {todayHours.toFixed(1)}h / {goalNeeded}h</span>
+              <span style={{ color: remaining === 0 ? "#4ade80" : "#38bdf8" }}>
+                {remaining === 0 ? "✓ GOAL MET" : `${remaining.toFixed(1)}h remaining`}
+              </span>
+            </div>
+            <div className="progress-track" style={{ marginBottom: 24 }}>
+              <div className="progress-fill" style={{ width: `${Math.min(100, (todayHours / goalNeeded) * 100)}%`, background: remaining === 0 ? "rgba(74, 222, 128, 0.8)" : "" }} />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div className="subtitle">Subject</div>
+              <select className="glass-input" value={subject} onChange={e => setSubject(e.target.value)}>
+                {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div className="subtitle">Hours to Deploy</div>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <input className="glass-input" type="number" min="0.5" max="16" step="0.5" value={hours} onChange={e => setHours(e.target.value)} style={{ flex: 1 }} />
+                <div style={{ display: "flex", gap: 6 }}>
+                  {[0.5, 1, 2, 3].map(h => (
+                    <button key={h} onClick={() => setHours(h)} className="glass-btn" style={{ padding: "10px", width: "auto", background: hours === h ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)" }}>{h}h</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <div className="subtitle">Cognitive Load</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {INTENSITY_TAGS.map(tag => (
+                  <button key={tag.id} onClick={() => setIntensity(tag.id)} style={{ 
+                    background: intensity === tag.id ? `rgba(${tag.color}, 0.2)` : "rgba(255,255,255,0.05)", 
+                    border: `1px solid ${intensity === tag.id ? `rgba(${tag.color}, 0.4)` : "rgba(255,255,255,0.1)"}`, 
+                    color: intensity === tag.id ? `rgb(${tag.color})` : "rgba(255,255,255,0.6)", 
+                    borderRadius: 20, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" 
+                  }}>
+                    {tag.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button className={`glass-btn ${success ? "success" : "primary"}`} onClick={handleAdd}>
+              {success ? "✓ DEPLOYED" : "⚡ DEPLOY HOURS"}
+            </button>
+          </div>
+
+          <div className="subtitle" style={{ marginTop: 24, marginBottom: 12 }}>Deployment Log</div>
+          {recentSessions.length === 0 && <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", textAlign: "center", padding: "20px" }}>No sessions logged yet.</div>}
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {recentSessions.map(s => {
+              const tag = INTENSITY_TAGS.find(t => t.id === s.intensity);
+              return (
+                <div key={s.id} className="glass-panel" style={{ padding: "12px 16px", margin: 0, display: "flex", alignItems: "center", gap: 16 }}>
+                  <div style={{ width: 4, height: 32, background: tag ? `rgb(${tag.color})` : "rgba(255,255,255,0.5)", borderRadius: 4, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{s.subject}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>{s.date} · {tag?.label || s.intensity}</div>
+                  </div>
+                  <div style={{ fontSize: 16, color: "#fff", fontWeight: 700 }}>{s.hours}h</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── INTEL (CARDS) VIEW ───────────────────────────────────────────────────────
+    function CardsView({ flashcards, updateFlashcard, addFlashcard, importCSV }) {
+      const [mode, setMode] = useState("review"); 
+      const [cardIndex, setCardIndex] = useState(0);
+      const [flipped, setFlipped] = useState(false);
+      const [newCard, setNewCard] = useState({ front: "", back: "", subject: SUBJECTS[0], type: "text" });
+      const [csvText, setCsvText] = useState("");
+      const [importMsg, setImportMsg] = useState("");
+
+      const dueCards = flashcards.filter(c => c.nextReview <= Date.now());
+      const currentCard = dueCards[cardIndex % Math.max(1, dueCards.length)];
+
+      const touchStartX = useRef(null);
+      const touchStartY = useRef(null);
+
+      const handleSwipe = (direction) => {
+        if (!currentCard) return;
+        const quality = direction === "right" ? 4 : 1;
+        updateFlashcard(sm2(currentCard, quality));
+        setFlipped(false);
+        setTimeout(() => setCardIndex(i => i + 1), 200);
+      };
+
+      const onTouchStart = (e) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
+      };
+
+      const onTouchEnd = (e) => {
+        if (!touchStartX.current) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        const dy = e.changedTouches[0].clientY - touchStartY.current;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+          handleSwipe(dx > 0 ? "right" : "left");
+        } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+          setFlipped(f => !f);
+        }
+        touchStartX.current = null;
+      };
+
+      const handleImport = () => {
+        const count = importCSV(csvText);
+        setImportMsg(`✓ Imported ${count} cards`);
+        setCsvText("");
+        setTimeout(() => setImportMsg(""), 3000);
+      };
+
+      return (
+        <div style={{ padding: "24px 16px" }}>
+          <div className="subtitle">Intelligence & Revision</div>
+          <div className="title-gradient" style={{ fontSize: 20, marginBottom: 20 }}>FLASHCARD INTEL</div>
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+            {[["review", "📖 Review"], ["add", "➕ Add"], ["import", "📥 Import"]].map(([m, label]) => (
+              <button key={m} onClick={() => setMode(m)} className="glass-btn" style={{ flex: 1, padding: "8px", background: mode === m ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)" }}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {mode === "review" && (
+            <div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 16, textAlign: "center", fontWeight: 500 }}>
+                {dueCards.length} cards due · Tap to flip · Swipe to judge
+              </div>
+              
+              {dueCards.length === 0 ? (
+                <div className="glass-panel" style={{ textAlign: "center", padding: "50px 20px" }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>✨</div>
+                  <div style={{ fontSize: 16, color: "#4ade80", fontWeight: 700, marginBottom: 8 }}>All caught up!</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Return tomorrow for new reviews.</div>
+                </div>
+              ) : (
+                <>
+                  <div className="swipe-card" style={{ height: 340 }} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onClick={() => setFlipped(f => !f)}>
+                    <div className="card-flip">
+                      <div className={`card-inner ${flipped ? "flipped" : ""}`}>
+                        
+                        {/* Front */}
+                        <div className="card-face glass-panel" style={{ margin: 0, border: "1px solid rgba(255,255,255,0.2)" }}>
+                          <div className="subtitle" style={{ marginBottom: 16, color: "#38bdf8" }}>{currentCard?.subject}</div>
+                          <div style={{ fontSize: 18, color: "#fff", lineHeight: 1.5, fontWeight: 500 }}>{currentCard?.front}</div>
+                          <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Tap to reveal</div>
+                        </div>
+                        
+                        {/* Back */}
+                        <div className="card-face card-back glass-panel" style={{ margin: 0, background: "rgba(56, 189, 248, 0.05)", border: "1px solid rgba(56, 189, 248, 0.3)" }}>
+                          <div className="subtitle" style={{ marginBottom: 16, color: "#38bdf8" }}>Answer</div>
+                          <div style={{ fontSize: 16, color: "#fff", lineHeight: 1.6 }}>{currentCard?.back}</div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 16, marginTop: 24 }}>
+                    <button onClick={() => handleSwipe("left")} className="glass-btn" style={{ flex: 1, background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#fca5a5" }}>
+                      ← Miss
+                    </button>
+                    <button onClick={() => setFlipped(f => !f)} className="glass-btn" style={{ flex: 0.8 }}>
+                      Flip
+                    </button>
+                    <button onClick={() => handleSwipe("right")} className="glass-btn" style={{ flex: 1, background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.3)", color: "#bbf7d0" }}>
+                      Known →
+                    </button>
+                  </div>
+                  <div style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 16, fontWeight: 600 }}>
+                    {(cardIndex % dueCards.length) + 1} / {dueCards.length} due
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {mode === "add" && (
+            <div className="glass-panel">
+              <div style={{ marginBottom: 16 }}>
+                <div className="subtitle">Subject</div>
+                <select className="glass-input" value={newCard.subject} onChange={e => setNewCard(c => ({ ...c, subject: e.target.value }))}>
+                  {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div className="subtitle">Question (Front)</div>
+                <textarea className="glass-input" rows={4} value={newCard.front} onChange={e => setNewCard(c => ({ ...c, front: e.target.value }))} placeholder="Enter concept..." style={{ resize: "none" }} />
+              </div>
+              <div style={{ marginBottom: 24 }}>
+                <div className="subtitle">Answer (Back)</div>
+                <textarea className="glass-input" rows={4} value={newCard.back} onChange={e => setNewCard(c => ({ ...c, back: e.target.value }))} placeholder="Enter answer..." style={{ resize: "none" }} />
+              </div>
+              <button className="glass-btn primary" onClick={() => { if (newCard.front && newCard.back) { addFlashcard(newCard); setNewCard({ front: "", back: "", subject: SUBJECTS[0], type: "text" }); } }}>
+                ➕ ADD CARD
+              </button>
+            </div>
+          )}
+
+          {mode === "import" && (
+            <div className="glass-panel">
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginBottom: 16, lineHeight: 1.6 }}>
+                Paste CSV formatted text.<br />
+                Format: <span style={{ color: "#38bdf8", fontWeight: 700 }}>front,back,subject</span>
+              </div>
+              <textarea className="glass-input" rows={8} value={csvText} onChange={e => setCsvText(e.target.value)} placeholder={`"What is X?","X is...","Polity"\n"Define Y","Y means...","Economy"`} style={{ marginBottom: 16, resize: "none" }} />
+              {importMsg && <div style={{ fontSize: 12, color: "#4ade80", marginBottom: 12, fontWeight: 600 }}>{importMsg}</div>}
+              <button className="glass-btn primary" onClick={handleImport}>📥 IMPORT CSV</button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ─── REWARDS (ARMORY) VIEW ────────────────────────────────────────────────────
+    function ArmoryView({ tokens, tokenHistory, redeemToken, streak }) {
+      const [deploying, setDeploying] = useState(null);
+
+      const handleDeploy = (id) => {
+        setDeploying(id);
+        setTimeout(() => {
+          redeemToken(id);
+          setDeploying(null);
+        }, 800);
+      };
+
+      const nextMilestones = [
+        { label: "7-Day Streak", target: 7, current: streak % 7, reward: "Special Meal 🍽️" },
+        { label: "30-Day Streak", target: 30, current: streak % 30, reward: "Movie Pass 🎬" },
+      ];
+
+      return (
+        <div style={{ padding: "24px 16px" }}>
+          <div className="subtitle">Reward Vault</div>
+          <div className="title-gradient" style={{ fontSize: 20, marginBottom: 8 }}>THE ARMORY</div>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 24, fontWeight: 500 }}>{tokens.length} token{tokens.length !== 1 ? "s" : ""} available</div>
+
+          <div style={{ marginBottom: 32 }}>
+            <div className="subtitle" style={{ marginBottom: 12 }}>Mission Progress</div>
+            {nextMilestones.map(m => (
+              <div key={m.label} className="glass-panel" style={{ padding: "16px", marginBottom: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "flex-end" }}>
+                  <div style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>{m.label} <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: 400, marginLeft: 4 }}>→ {m.reward}</span></div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>{m.current} / {m.target}</div>
+                </div>
+                <div className="progress-track" style={{ height: 8 }}>
+                  <div className="progress-fill" style={{ width: `${(m.current / m.target) * 100}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="subtitle" style={{ marginBottom: 12 }}>Unspent Inventory</div>
+
+          {tokens.length === 0 && (
+            <div className="glass-panel" style={{ textAlign: "center", padding: "40px 20px", borderStyle: "dashed" }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>🎯</div>
+              <div style={{ fontSize: 14, color: "#fff", fontWeight: 600, marginBottom: 4 }}>No tokens yet.</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Hit daily goals and build streaks to earn rewards.</div>
+            </div>
+          )}
+
+          {tokens.map(token => {
+            const isDeploying = deploying === token.id;
+            return (
+              <div key={token.id} className="glass-panel" style={{ padding: "16px", display: "flex", alignItems: "center", gap: 16, opacity: isDeploying ? 0.5 : 1, transform: isDeploying ? "scale(0.97)" : "none", transition: "all 0.3s" }}>
+                <div style={{ fontSize: 32, background: "rgba(255,255,255,0.1)", borderRadius: "50%", width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {token.emoji}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{token.label}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>Earned {token.date}</div>
+                </div>
+                <button className="glass-btn primary" style={{ width: "auto", padding: "8px 16px" }} onClick={() => handleDeploy(token.id)} disabled={isDeploying}>
+                  {isDeploying ? "..." : "USE"}
+                </button>
+              </div>
+            );
+          })}
+
+          {tokenHistory.length > 0 && (
+            <div style={{ marginTop: 32 }}>
+              <div className="subtitle" style={{ marginBottom: 12 }}>Campaign History</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[...tokenHistory].reverse().map(token => (
+                  <div key={token.id + "_hist"} className="glass-panel" style={{ padding: "12px 16px", margin: 0, display: "flex", alignItems: "center", gap: 16, opacity: 0.5 }}>
+                    <div style={{ fontSize: 20 }}>{token.emoji}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, color: "#fff", textDecoration: "line-through" }}>{token.label}</div>
+                      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>Redeemed {new Date(token.redeemedAt).toLocaleDateString()}</div>
+                    </div>
+                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 800, letterSpacing: "0.1em" }}>SPENT</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ─── MOUNT REACT APP ──────────────────────────────────────────────────────────
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
 </body>
 </html>
