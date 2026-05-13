@@ -5,28 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Study Command</title>
   
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-    /* ─── GLOBAL STYLES & GLASSMORPHISM ─── */
+    /* ─── GLOBAL STYLES & ANIMATED GLASSMORPHISM ─── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body { 
       font-family: 'Inter', sans-serif; 
-      /* Elegant dark gradient background */
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      background-attachment: fixed;
+      /* Animated gradient background */
+      background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a3a);
+      background-size: 400% 400%;
+      animation: ambientGradient 15s ease infinite;
       color: #ffffff; 
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
+      color-scheme: dark;
     }
     
-    ::-webkit-scrollbar { width: 0; } /* Hide scrollbar for clean look */
+    ::-webkit-scrollbar { width: 0; }
 
     .app-container {
       max-width: 430px;
@@ -45,6 +46,14 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       padding: 20px;
       margin-bottom: 16px;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, background 0.4s ease;
+    }
+    
+    .glass-panel.interactive:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     /* Glass Inputs */
@@ -58,11 +67,13 @@
       outline: none;
       font-family: 'Inter', sans-serif;
       font-size: 14px;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
     }
     .glass-input:focus {
       background: rgba(0, 0, 0, 0.3);
-      border-color: rgba(255, 255, 255, 0.4);
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+      transform: translateY(-1px);
     }
     .glass-input::placeholder { color: rgba(255, 255, 255, 0.4); }
     .glass-input option { background: #203a43; color: #fff; }
@@ -80,15 +91,26 @@
       cursor: pointer;
       width: 100%;
       letter-spacing: 0.05em;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       backdrop-filter: blur(4px);
+      position: relative;
+      overflow: hidden;
     }
-    .glass-btn:hover { background: rgba(255, 255, 255, 0.15); }
-    .glass-btn:active { transform: scale(0.98); }
+    .glass-btn:hover { 
+      background: rgba(255, 255, 255, 0.15); 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    .glass-btn:active { transform: scale(0.95); }
+    
     .glass-btn.primary {
       background: rgba(56, 189, 248, 0.2);
       border-color: rgba(56, 189, 248, 0.4);
       color: #bae6fd;
+    }
+    .glass-btn.primary:hover {
+      background: rgba(56, 189, 248, 0.3);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.25);
     }
     .glass-btn.success {
       background: rgba(34, 197, 94, 0.2);
@@ -112,7 +134,7 @@
       display: flex;
       z-index: 100;
       padding: 12px 8px;
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.3);
     }
     .tab-btn {
       flex: 1;
@@ -124,7 +146,7 @@
       border: none;
       cursor: pointer;
       color: rgba(255, 255, 255, 0.4);
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       font-family: 'Inter', sans-serif;
       font-size: 10px;
       font-weight: 600;
@@ -132,29 +154,36 @@
       letter-spacing: 0.05em;
       position: relative;
     }
-    .tab-btn.active {
-      color: #fff;
+    .tab-btn:hover { color: rgba(255, 255, 255, 0.7); transform: translateY(-2px); }
+    .tab-btn.active { color: #fff; transform: translateY(-4px); }
+    .tab-btn span.icon { 
+      font-size: 22px; 
+      margin-bottom: 2px; 
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .tab-btn span.icon { font-size: 22px; margin-bottom: 2px; }
+    .tab-btn.active span.icon { transform: scale(1.15); }
 
-    /* Progress Bars */
+    /* Animated Progress Bars */
     .progress-track {
-      height: 6px;
+      height: 8px;
       background: rgba(0, 0, 0, 0.3);
       border-radius: 8px;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
     }
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, rgba(56, 189, 248, 0.8), rgba(167, 139, 250, 0.8));
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.8) 0%, rgba(167, 139, 250, 0.8) 50%, rgba(56, 189, 248, 0.8) 100%);
+      background-size: 200% 100%;
       border-radius: 8px;
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
+      animation: progressShimmer 3s linear infinite;
     }
 
     /* Cards */
     .card-flip { perspective: 1000px; height: 100%; }
-    .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.4,0,0.2,1); }
     .card-inner.flipped { transform: rotateY(180deg); }
     .card-face { 
       position: absolute; 
@@ -168,15 +197,18 @@
       padding: 32px; 
       border-radius: 20px;
       text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
     .card-back { transform: rotateY(180deg); }
-    .swipe-card { touch-action: pan-y; user-select: none; }
+    .swipe-card { touch-action: pan-y; user-select: none; cursor: pointer; }
 
     /* Typography & Utilities */
     .title-gradient {
-      background: linear-gradient(to right, #e0f2fe, #7dd3fc);
+      background: linear-gradient(to right, #e0f2fe, #7dd3fc, #c084fc);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-size: 200% auto;
+      animation: shine 4s linear infinite;
       font-weight: 800;
     }
     .subtitle {
@@ -190,9 +222,71 @@
     .stat-box {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 16px;
       text-align: center;
+      transition: all 0.3s ease;
+    }
+    .stat-box:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    /* ─── KEYFRAME ANIMATIONS ─── */
+    @keyframes ambientGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes shine {
+      to { background-position: 200% center; }
+    }
+    
+    @keyframes progressShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    @keyframes slideUpFade {
+      0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      70% { transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Animation Classes */
+    .animate-page {
+      animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    .stagger-item {
+      opacity: 0;
+      animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .float-icon {
+      display: inline-block;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
     }
   </style>
 </head>
@@ -203,10 +297,9 @@
     const { useState, useEffect, useRef, useCallback } = React;
 
     // ─── CONSTANTS ───────────────────────────────────────────────────────────────
-    const TARGET_DATE = new Date("2026-05-24T00:00:00");
     const SUBJECTS = ["History", "Geography", "Polity", "Economy", "Science", "Environment", "CSAT", "Current Affairs"];
     const INTENSITY_TAGS = [
-      { id: "active_recall", label: "Active Recall", color: "239, 68, 68" }, // rgb values for rgba integration
+      { id: "active_recall", label: "Active Recall", color: "239, 68, 68" },
       { id: "practice_qs", label: "Practice Qs", color: "249, 115, 22" },
       { id: "note_taking", label: "Note Taking", color: "234, 179, 8" },
       { id: "passive_read", label: "Passive Read", color: "59, 130, 246" },
@@ -216,26 +309,48 @@
     const COUNTER_OFFENSIVE_GOAL = 10;
     const RETREAT_WINDOW_HOURS = 48;
 
+    const DEFAULT_FLASHCARDS = [
+      { id: 1, front: "What is the Preamble of the Indian Constitution?", back: "We, the People of India, having solemnly resolved to constitute India into a Sovereign Socialist Secular Democratic Republic...", subject: "Polity", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
+      { id: 2, front: "Name the Five Permanent Members of the UN Security Council", back: "USA, UK, France, Russia, China — collectively known as P5", subject: "History", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
+      { id: 3, front: "What is the Tropic of Cancer?", back: "Latitude 23.5°N — passes through Rajasthan, Gujarat, MP, Chhattisgarh, Jharkhand, West Bengal, Tripura, Mizoram in India", subject: "Geography", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
+    ];
+
     // ─── INITIAL STATE ────────────────────────────────────────────────────────────
     const getInitialState = () => {
-      try {
-        const saved = localStorage.getItem("studycommand_v2");
-        if (saved) return JSON.parse(saved);
-      } catch {}
-      return {
+      let state = {
+        startDate: "2025-06-01T00:00:00",
+        targetDate: "2026-05-24T00:00:00",
+        milestones: [
+          { id: 1, target: 7, rewardLabel: "Biryani Cheat Meal", rewardEmoji: "🥘" },
+          { id: 2, target: 30, rewardLabel: "Gaming Session", rewardEmoji: "🎮" }
+        ],
         sessions: [],
         streak: 0,
         longestStreak: 0,
         tacticalRetreat: null,
         tokens: [],
         tokenHistory: [],
-        flashcards: [
-          { id: 1, front: "What is the Preamble of the Indian Constitution?", back: "We, the People of India, having solemnly resolved to constitute India into a Sovereign Socialist Secular Democratic Republic...", subject: "Polity", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
-          { id: 2, front: "Name the Five Permanent Members of the UN Security Council", back: "USA, UK, France, Russia, China — collectively known as P5", subject: "History", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
-          { id: 3, front: "What is the Tropic of Cancer?", back: "Latitude 23.5°N — passes through Rajasthan, Gujarat, MP, Chhattisgarh, Jharkhand, West Bengal, Tripura, Mizoram in India", subject: "Geography", type: "text", interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false },
-        ],
+        flashcards: [...DEFAULT_FLASHCARDS],
         lastAwardCheck: null,
       };
+
+      try {
+        const saved = localStorage.getItem("studycommand_v3_glass");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          state = { ...state, ...parsed };
+          
+          if (!state.startDate) state.startDate = "2025-06-01T00:00:00";
+          if (!state.targetDate) state.targetDate = "2026-05-24T00:00:00";
+          if (!state.milestones) {
+            state.milestones = [
+              { id: 1, target: 7, rewardLabel: "Biryani Cheat Meal", rewardEmoji: "🥘" },
+              { id: 2, target: 30, rewardLabel: "Gaming Session", rewardEmoji: "🎮" }
+            ];
+          }
+        }
+      } catch {}
+      return state;
     };
 
     // ─── SPACED REPETITION (SM-2) ────────────────────────────────────────────────
@@ -271,7 +386,7 @@
       const [now, setNow] = useState(Date.now());
 
       useEffect(() => {
-        try { localStorage.setItem("studycommand_v2", JSON.stringify(state)); } catch {}
+        try { localStorage.setItem("studycommand_v3_glass", JSON.stringify(state)); } catch {}
       }, [state]);
 
       useEffect(() => {
@@ -293,17 +408,28 @@
             newTokens.push({ id: Date.now() + 2, type: "daily2", label: "2-Hour Leisure", emoji: "🎮", date: today, spent: false });
           }
         }
-        if (state.streak >= 7 && state.streak % 7 === 0) {
-          const weekKey = Math.floor(state.streak / 7);
-          const alreadyAwarded = state.tokens.some(t => t.type === "weekly" && t.weekKey === weekKey) ||
-            state.tokenHistory.some(t => t.type === "weekly" && t.weekKey === weekKey);
-          if (!alreadyAwarded) newTokens.push({ id: Date.now() + 3, type: "weekly", label: "Special Meal", emoji: "🍽️", date: today, weekKey, spent: false });
-        }
-        if (state.streak >= 30 && state.streak % 30 === 0) {
-          const monthKey = Math.floor(state.streak / 30);
-          const alreadyAwarded = state.tokens.some(t => t.type === "monthly" && t.monthKey === monthKey) ||
-            state.tokenHistory.some(t => t.type === "monthly" && t.monthKey === monthKey);
-          if (!alreadyAwarded) newTokens.push({ id: Date.now() + 4, type: "monthly", label: "Movie/Event Pass", emoji: "🎬", date: today, monthKey, spent: false });
+
+        if (state.streak > 0) {
+          state.milestones.forEach(m => {
+            if (state.streak >= m.target && state.streak % m.target === 0) {
+              const iteration = Math.floor(state.streak / m.target);
+              const alreadyAwarded = state.tokens.some(t => t.type === "milestone" && t.milestoneId === m.id && t.iteration === iteration) ||
+                state.tokenHistory.some(t => t.type === "milestone" && t.milestoneId === m.id && t.iteration === iteration);
+              
+              if (!alreadyAwarded) {
+                newTokens.push({ 
+                  id: Date.now() + Math.random(), 
+                  type: "milestone", 
+                  milestoneId: m.id, 
+                  label: m.rewardLabel, 
+                  emoji: m.rewardEmoji, 
+                  date: today, 
+                  iteration, 
+                  spent: false 
+                });
+              }
+            }
+          });
         }
 
         if (newTokens.length > 0) {
@@ -311,9 +437,10 @@
         } else {
           setState(s => ({ ...s, lastAwardCheck: today }));
         }
-      }, [state.streak, state.sessions]);
+      }, [state.streak, state.sessions, state.milestones]);
 
-      const msLeft = Math.max(0, TARGET_DATE - now);
+      const targetDateObj = new Date(state.targetDate);
+      const msLeft = Math.max(0, targetDateObj - now);
       const countdown = formatCountdown(msLeft);
       const todayHours = getTodayHours(state.sessions);
       const unspentTokens = state.tokens.filter(t => !t.spent);
@@ -360,12 +487,24 @@
         });
       }, []);
 
+      const updateTimeline = useCallback((newStart, newTarget) => {
+        setState(s => ({ ...s, startDate: newStart, targetDate: newTarget }));
+      }, []);
+
+      const updateMilestones = useCallback((newMilestones) => {
+        setState(s => ({ ...s, milestones: newMilestones }));
+      }, []);
+
       const updateFlashcard = useCallback((updated) => {
         setState(s => ({ ...s, flashcards: s.flashcards.map(c => c.id === updated.id ? updated : c) }));
       }, []);
 
       const addFlashcard = useCallback((card) => {
         setState(s => ({ ...s, flashcards: [...s.flashcards, { ...card, id: Date.now(), interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false }] }));
+      }, []);
+
+      const resetFlashcards = useCallback(() => {
+        setState(s => ({ ...s, flashcards: [...DEFAULT_FLASHCARDS] }));
       }, []);
 
       const importCSV = useCallback((text) => {
@@ -387,10 +526,13 @@
 
       return (
         <div className="app-container">
-          {tab === "clock" && <ClockView countdown={countdown} msLeft={msLeft} todayHours={todayHours} streak={state.streak} longestStreak={state.longestStreak} tacticalRetreat={state.tacticalRetreat} sessions={state.sessions} now={now} />}
-          {tab === "log" && <LogView addSession={addSession} sessions={state.sessions} todayHours={todayHours} tacticalRetreat={state.tacticalRetreat} />}
-          {tab === "cards" && <CardsView flashcards={state.flashcards} updateFlashcard={updateFlashcard} addFlashcard={addFlashcard} importCSV={importCSV} />}
-          {tab === "armory" && <ArmoryView tokens={unspentTokens} tokenHistory={state.tokenHistory} redeemToken={redeemToken} streak={state.streak} />}
+          {/* Keying the wrapper forces re-mount animations on tab switch */}
+          <div key={tab} className="animate-page">
+            {tab === "clock" && <ClockView countdown={countdown} msLeft={msLeft} todayHours={todayHours} streak={state.streak} longestStreak={state.longestStreak} tacticalRetreat={state.tacticalRetreat} sessions={state.sessions} now={now} targetDate={state.targetDate} startDate={state.startDate} updateTimeline={updateTimeline} />}
+            {tab === "log" && <LogView addSession={addSession} sessions={state.sessions} todayHours={todayHours} tacticalRetreat={state.tacticalRetreat} />}
+            {tab === "cards" && <CardsView flashcards={state.flashcards} updateFlashcard={updateFlashcard} addFlashcard={addFlashcard} importCSV={importCSV} resetFlashcards={resetFlashcards} />}
+            {tab === "armory" && <ArmoryView tokens={unspentTokens} tokenHistory={state.tokenHistory} redeemToken={redeemToken} streak={state.streak} milestones={state.milestones} updateMilestones={updateMilestones} />}
+          </div>
 
           <div className="bottom-nav">
             {TABS.map(t => (
@@ -398,7 +540,7 @@
                 <span className="icon">{t.icon}</span>
                 {t.label}
                 {t.id === "armory" && unspentTokens.length > 0 && (
-                  <span style={{ position: "absolute", top: 4, right: 18, background: "#38bdf8", color: "#0f2027", borderRadius: "50%", width: 14, height: 14, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>{unspentTokens.length}</span>
+                  <span style={{ position: "absolute", top: 0, right: 14, background: "#38bdf8", color: "#0f2027", borderRadius: "50%", width: 14, height: 14, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, animation: "popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }}>{unspentTokens.length}</span>
                 )}
               </button>
             ))}
@@ -408,10 +550,17 @@
     }
 
     // ─── DASHBOARD (CLOCK) VIEW ───────────────────────────────────────────────────
-    function ClockView({ countdown, msLeft, todayHours, streak, longestStreak, tacticalRetreat, sessions, now }) {
+    function ClockView({ countdown, msLeft, todayHours, streak, longestStreak, tacticalRetreat, sessions, now, targetDate, startDate, updateTimeline }) {
+      const [isEditingDate, setIsEditingDate] = useState(false);
+      const [tempStart, setTempStart] = useState(startDate.split('T')[0]);
+      const [tempTarget, setTempTarget] = useState(targetDate.split('T')[0]);
+
       const progress = Math.min(1, todayHours / DAILY_GOAL);
-      const daysElapsed = Math.floor((now - new Date("2025-06-01")) / 86400000);
-      const totalDays = Math.floor((TARGET_DATE - new Date("2025-06-01")) / 86400000);
+      
+      const startMs = new Date(startDate).getTime();
+      const targetMs = new Date(targetDate).getTime();
+      const daysElapsed = Math.floor((now - startMs) / 86400000);
+      const totalDays = Math.max(1, Math.floor((targetMs - startMs) / 86400000));
       const campaignProgress = Math.max(0, Math.min(1, daysElapsed / totalDays));
 
       const todaySubs = {};
@@ -424,18 +573,18 @@
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
             <div>
               <div className="subtitle">Study Command</div>
-              <div className="title-gradient" style={{ fontSize: 20 }}>OPERATION: UPSC</div>
+              <div className="title-gradient" style={{ fontSize: 22 }}>OPERATION: UPSC</div>
             </div>
             <div style={{ textAlign: "right" }}>
               <div className="subtitle">Streak</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: streak >= 7 ? "#38bdf8" : "#fff" }}>🔥 {streak}</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: streak >= 7 ? "#38bdf8" : "#fff", textShadow: streak >= 7 ? "0 0 15px rgba(56, 189, 248, 0.5)" : "none", transition: "all 0.3s" }}>🔥 {streak}</div>
             </div>
           </div>
 
           {tacticalRetreat && (
-            <div className="glass-panel" style={{ borderLeft: "4px solid #ef4444" }}>
+            <div className="glass-panel stagger-item" style={{ borderLeft: "4px solid #ef4444", animationDelay: "0.1s" }}>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <span style={{ fontSize: 24 }}>⚠️</span>
+                <span className="float-icon" style={{ fontSize: 24 }}>⚠️</span>
                 <div>
                   <div style={{ fontSize: 11, color: "#fca5a5", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Tactical Retreat Active</div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>Log {COUNTER_OFFENSIVE_GOAL}h today for Counter-Offensive to restore streak.</div>
@@ -444,43 +593,59 @@
             </div>
           )}
 
-          <div className="glass-panel" style={{ textAlign: "center", padding: "30px 20px" }}>
-            <div className="subtitle" style={{ marginBottom: 20 }}>
-              {msLeft > 0 ? "Countdown to Prelims" : "Campaign Complete"}
+          <div className="glass-panel interactive stagger-item" style={{ textAlign: "center", padding: "30px 20px", animationDelay: "0.1s" }}>
+            <div className="subtitle" style={{ marginBottom: 20, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>
+              {msLeft > 0 ? "Countdown to Target" : "Campaign Complete"}
+              <button onClick={() => setIsEditingDate(!isEditingDate)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 10, padding: "4px 8px", borderRadius: "10px", transition: "all 0.2s" }}>EDIT</button>
             </div>
+            
+            {isEditingDate && (
+              <div style={{ marginBottom: 20, background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 16, border: "1px solid rgba(255,255,255,0.05)", animation: "slideUpFade 0.3s ease forwards" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <span className="subtitle" style={{margin: 0}}>Start Date</span>
+                  <input type="date" className="glass-input" style={{ width: "auto", padding: "8px" }} value={tempStart} onChange={e => setTempStart(e.target.value)} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <span className="subtitle" style={{margin: 0}}>Target Date</span>
+                  <input type="date" className="glass-input" style={{ width: "auto", padding: "8px" }} value={tempTarget} onChange={e => setTempTarget(e.target.value)} />
+                </div>
+                <button className="glass-btn success pulse-glow" onClick={() => { updateTimeline(`${tempStart}T00:00:00`, `${tempTarget}T00:00:00`); setIsEditingDate(false); }}>Save Timeline</button>
+              </div>
+            )}
+
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
               {[["d", "Days"], ["h", "Hrs"], ["m", "Min"], ["s", "Sec"]].map(([k, label]) => (
                 <div key={k}>
-                  <div style={{ fontSize: 32, fontWeight: 800, color: "#fff", textShadow: "0 2px 10px rgba(255,255,255,0.2)" }}>{countdown[k]}</div>
+                  <div style={{ fontSize: 34, fontWeight: 800, color: "#fff", textShadow: "0 4px 15px rgba(0,0,0,0.5)" }}>{countdown[k]}</div>
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 6, textTransform: "uppercase", fontWeight: 600 }}>{label}</div>
                 </div>
               ))}
             </div>
             
-            <div className="progress-track" style={{ marginTop: 24 }}>
+            <div className="progress-track" style={{ marginTop: 24, height: 10 }}>
               <div className="progress-fill" style={{ width: `${campaignProgress * 100}%` }} />
             </div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 8 }}>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", marginTop: 8, fontWeight: 600 }}>
               {Math.round(campaignProgress * 100)}% of timeline elapsed
             </div>
           </div>
 
-          <div className="glass-panel">
+          <div className="glass-panel interactive stagger-item" style={{ animationDelay: "0.2s" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div className="subtitle" style={{ margin: 0 }}>Today's Deployment</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: todayHours >= DAILY_GOAL ? "#4ade80" : "#fff" }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: todayHours >= DAILY_GOAL ? "#4ade80" : "#fff", transition: "color 0.3s" }}>
                 {todayHours.toFixed(1)}h / {DAILY_GOAL}h
               </div>
             </div>
             
             <div className="progress-track" style={{ marginBottom: 16 }}>
-              <div className="progress-fill" style={{ width: `${progress * 100}%`, background: todayHours >= DAILY_GOAL ? "rgba(74, 222, 128, 0.8)" : "" }} />
+              <div className="progress-fill" style={{ width: `${progress * 100}%`, background: todayHours >= DAILY_GOAL ? "linear-gradient(90deg, #22c55e, #10b981, #22c55e)" : "" }} />
             </div>
 
             {Object.keys(todaySubs).length > 0 ? (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {Object.entries(todaySubs).map(([sub, hrs]) => (
-                  <div key={sub} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "6px 12px", fontSize: 11, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
+                  <div key={sub} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "6px 12px", fontSize: 11, color: "rgba(255,255,255,0.9)", fontWeight: 500, animation: "popIn 0.4s ease forwards" }}>
                     {sub} <span style={{ color: "#38bdf8", fontWeight: 700, marginLeft: 4 }}>{hrs}h</span>
                   </div>
                 ))}
@@ -492,14 +657,14 @@
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             {[
-              { label: "Best Streak", value: `${longestStreak} d`, icon: "🏆" },
-              { label: "Total Sessions", value: sessions.length, icon: "📋" },
-              { label: "Total Hours", value: `${sessions.reduce((a, s) => a + s.hours, 0).toFixed(0)}h`, icon: "⏱" },
-              { label: "Days Left", value: countdown.d, icon: "📅" },
+              { label: "Best Streak", value: `${longestStreak} d`, icon: "🏆", delay: "0.3s" },
+              { label: "Total Sessions", value: sessions.length, icon: "📋", delay: "0.4s" },
+              { label: "Total Hours", value: `${sessions.reduce((a, s) => a + s.hours, 0).toFixed(0)}h`, icon: "⏱", delay: "0.5s" },
+              { label: "Days Left", value: countdown.d, icon: "📅", delay: "0.6s" },
             ].map(stat => (
-              <div key={stat.label} className="stat-box">
-                <div style={{ fontSize: 18, marginBottom: 8 }}>{stat.icon}</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{stat.value}</div>
+              <div key={stat.label} className="stat-box stagger-item" style={{ animationDelay: stat.delay }}>
+                <div className="float-icon" style={{ fontSize: 20, marginBottom: 8 }}>{stat.icon}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{stat.value}</div>
                 <div className="subtitle" style={{ margin: 0 }}>{stat.label}</div>
               </div>
             ))}
@@ -529,17 +694,17 @@
       return (
         <div style={{ padding: "24px 16px" }}>
           <div className="subtitle">Resource Allocation</div>
-          <div className="title-gradient" style={{ fontSize: 20, marginBottom: 20 }}>DEPLOY HOURS</div>
+          <div className="title-gradient" style={{ fontSize: 22, marginBottom: 20 }}>DEPLOY HOURS</div>
 
-          <div className="glass-panel">
+          <div className="glass-panel interactive stagger-item" style={{ animationDelay: "0.1s" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: 10 }}>
               <span>TODAY: {todayHours.toFixed(1)}h / {goalNeeded}h</span>
-              <span style={{ color: remaining === 0 ? "#4ade80" : "#38bdf8" }}>
+              <span style={{ color: remaining === 0 ? "#4ade80" : "#38bdf8", transition: "color 0.3s" }}>
                 {remaining === 0 ? "✓ GOAL MET" : `${remaining.toFixed(1)}h remaining`}
               </span>
             </div>
             <div className="progress-track" style={{ marginBottom: 24 }}>
-              <div className="progress-fill" style={{ width: `${Math.min(100, (todayHours / goalNeeded) * 100)}%`, background: remaining === 0 ? "rgba(74, 222, 128, 0.8)" : "" }} />
+              <div className="progress-fill" style={{ width: `${Math.min(100, (todayHours / goalNeeded) * 100)}%`, background: remaining === 0 ? "linear-gradient(90deg, #22c55e, #10b981, #22c55e)" : "" }} />
             </div>
 
             <div style={{ marginBottom: 16 }}>
@@ -554,8 +719,8 @@
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                 <input className="glass-input" type="number" min="0.5" max="16" step="0.5" value={hours} onChange={e => setHours(e.target.value)} style={{ flex: 1 }} />
                 <div style={{ display: "flex", gap: 6 }}>
-                  {[0.5, 1, 2, 3].map(h => (
-                    <button key={h} onClick={() => setHours(h)} className="glass-btn" style={{ padding: "10px", width: "auto", background: hours === h ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)" }}>{h}h</button>
+                  {[1, 2, 3].map(h => (
+                    <button key={h} onClick={() => setHours(h)} className="glass-btn" style={{ padding: "10px", width: "auto", background: hours === h ? "rgba(56, 189, 248, 0.2)" : "rgba(255,255,255,0.05)", borderColor: hours === h ? "rgba(56, 189, 248, 0.4)" : "" }}>{h}h</button>
                   ))}
                 </div>
               </div>
@@ -567,9 +732,11 @@
                 {INTENSITY_TAGS.map(tag => (
                   <button key={tag.id} onClick={() => setIntensity(tag.id)} style={{ 
                     background: intensity === tag.id ? `rgba(${tag.color}, 0.2)` : "rgba(255,255,255,0.05)", 
-                    border: `1px solid ${intensity === tag.id ? `rgba(${tag.color}, 0.4)` : "rgba(255,255,255,0.1)"}`, 
+                    border: `1px solid ${intensity === tag.id ? `rgba(${tag.color}, 0.5)` : "rgba(255,255,255,0.1)"}`, 
                     color: intensity === tag.id ? `rgb(${tag.color})` : "rgba(255,255,255,0.6)", 
-                    borderRadius: 20, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" 
+                    borderRadius: 20, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    transform: intensity === tag.id ? "scale(1.05)" : "scale(1)",
+                    boxShadow: intensity === tag.id ? `0 4px 15px rgba(${tag.color}, 0.2)` : "none"
                   }}>
                     {tag.label}
                   </button>
@@ -577,20 +744,20 @@
               </div>
             </div>
 
-            <button className={`glass-btn ${success ? "success" : "primary"}`} onClick={handleAdd}>
+            <button className={`glass-btn ${success ? "success pulse-glow" : "primary"}`} onClick={handleAdd}>
               {success ? "✓ DEPLOYED" : "⚡ DEPLOY HOURS"}
             </button>
           </div>
 
-          <div className="subtitle" style={{ marginTop: 24, marginBottom: 12 }}>Deployment Log</div>
-          {recentSessions.length === 0 && <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", textAlign: "center", padding: "20px" }}>No sessions logged yet.</div>}
+          <div className="subtitle stagger-item" style={{ marginTop: 24, marginBottom: 12, animationDelay: "0.2s" }}>Deployment Log</div>
+          {recentSessions.length === 0 && <div className="stagger-item" style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", textAlign: "center", padding: "20px", animationDelay: "0.2s" }}>No sessions logged yet.</div>}
           
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {recentSessions.map(s => {
+            {recentSessions.map((s, index) => {
               const tag = INTENSITY_TAGS.find(t => t.id === s.intensity);
               return (
-                <div key={s.id} className="glass-panel" style={{ padding: "12px 16px", margin: 0, display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ width: 4, height: 32, background: tag ? `rgb(${tag.color})` : "rgba(255,255,255,0.5)", borderRadius: 4, flexShrink: 0 }} />
+                <div key={s.id} className="glass-panel interactive stagger-item" style={{ padding: "12px 16px", margin: 0, display: "flex", alignItems: "center", gap: 16, animationDelay: `${0.2 + (index * 0.05)}s` }}>
+                  <div style={{ width: 4, height: 32, background: tag ? `rgb(${tag.color})` : "rgba(255,255,255,0.5)", borderRadius: 4, flexShrink: 0, boxShadow: tag ? `0 0 10px rgba(${tag.color}, 0.5)` : "none" }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{s.subject}</div>
                     <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>{s.date} · {tag?.label || s.intensity}</div>
@@ -605,7 +772,7 @@
     }
 
     // ─── INTEL (CARDS) VIEW ───────────────────────────────────────────────────────
-    function CardsView({ flashcards, updateFlashcard, addFlashcard, importCSV }) {
+    function CardsView({ flashcards, updateFlashcard, addFlashcard, importCSV, resetFlashcards }) {
       const [mode, setMode] = useState("review"); 
       const [cardIndex, setCardIndex] = useState(0);
       const [flipped, setFlipped] = useState(false);
@@ -624,7 +791,7 @@
         const quality = direction === "right" ? 4 : 1;
         updateFlashcard(sm2(currentCard, quality));
         setFlipped(false);
-        setTimeout(() => setCardIndex(i => i + 1), 200);
+        setTimeout(() => setCardIndex(i => i + 1), 300); // Wait for transition
       };
 
       const onTouchStart = (e) => {
@@ -653,26 +820,26 @@
 
       return (
         <div style={{ padding: "24px 16px" }}>
-          <div className="subtitle">Intelligence & Revision</div>
-          <div className="title-gradient" style={{ fontSize: 20, marginBottom: 20 }}>FLASHCARD INTEL</div>
+          <div className="subtitle stagger-item">Intelligence & Revision</div>
+          <div className="title-gradient stagger-item" style={{ fontSize: 22, marginBottom: 20, animationDelay: "0.1s" }}>FLASHCARD INTEL</div>
 
-          <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+          <div className="stagger-item" style={{ display: "flex", gap: 8, marginBottom: 24, animationDelay: "0.2s" }}>
             {[["review", "📖 Review"], ["add", "➕ Add"], ["import", "📥 Import"]].map(([m, label]) => (
-              <button key={m} onClick={() => setMode(m)} className="glass-btn" style={{ flex: 1, padding: "8px", background: mode === m ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)" }}>
+              <button key={m} onClick={() => setMode(m)} className="glass-btn" style={{ flex: 1, padding: "8px", background: mode === m ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.05)", borderColor: mode === m ? "rgba(255,255,255,0.4)" : "" }}>
                 {label}
               </button>
             ))}
           </div>
 
           {mode === "review" && (
-            <div>
+            <div className="animate-page">
               <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 16, textAlign: "center", fontWeight: 500 }}>
                 {dueCards.length} cards due · Tap to flip · Swipe to judge
               </div>
               
               {dueCards.length === 0 ? (
                 <div className="glass-panel" style={{ textAlign: "center", padding: "50px 20px" }}>
-                  <div style={{ fontSize: 40, marginBottom: 16 }}>✨</div>
+                  <div className="float-icon" style={{ fontSize: 40, marginBottom: 16 }}>✨</div>
                   <div style={{ fontSize: 16, color: "#4ade80", fontWeight: 700, marginBottom: 8 }}>All caught up!</div>
                   <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Return tomorrow for new reviews.</div>
                 </div>
@@ -683,14 +850,14 @@
                       <div className={`card-inner ${flipped ? "flipped" : ""}`}>
                         
                         {/* Front */}
-                        <div className="card-face glass-panel" style={{ margin: 0, border: "1px solid rgba(255,255,255,0.2)" }}>
+                        <div className="card-face glass-panel interactive" style={{ margin: 0, border: "1px solid rgba(255,255,255,0.2)" }}>
                           <div className="subtitle" style={{ marginBottom: 16, color: "#38bdf8" }}>{currentCard?.subject}</div>
                           <div style={{ fontSize: 18, color: "#fff", lineHeight: 1.5, fontWeight: 500 }}>{currentCard?.front}</div>
                           <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Tap to reveal</div>
                         </div>
                         
                         {/* Back */}
-                        <div className="card-face card-back glass-panel" style={{ margin: 0, background: "rgba(56, 189, 248, 0.05)", border: "1px solid rgba(56, 189, 248, 0.3)" }}>
+                        <div className="card-face card-back glass-panel interactive" style={{ margin: 0, background: "rgba(56, 189, 248, 0.08)", border: "1px solid rgba(56, 189, 248, 0.4)", boxShadow: "0 10px 40px rgba(56, 189, 248, 0.1)" }}>
                           <div className="subtitle" style={{ marginBottom: 16, color: "#38bdf8" }}>Answer</div>
                           <div style={{ fontSize: 16, color: "#fff", lineHeight: 1.6 }}>{currentCard?.back}</div>
                         </div>
@@ -719,7 +886,7 @@
           )}
 
           {mode === "add" && (
-            <div className="glass-panel">
+            <div className="glass-panel animate-page">
               <div style={{ marginBottom: 16 }}>
                 <div className="subtitle">Subject</div>
                 <select className="glass-input" value={newCard.subject} onChange={e => setNewCard(c => ({ ...c, subject: e.target.value }))}>
@@ -741,14 +908,30 @@
           )}
 
           {mode === "import" && (
-            <div className="glass-panel">
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginBottom: 16, lineHeight: 1.6 }}>
-                Paste CSV formatted text.<br />
-                Format: <span style={{ color: "#38bdf8", fontWeight: 700 }}>front,back,subject</span>
+            <div className="animate-page">
+              <div className="glass-panel">
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginBottom: 16, lineHeight: 1.6 }}>
+                  Paste CSV formatted text.<br />
+                  Format: <span style={{ color: "#38bdf8", fontWeight: 700 }}>front,back,subject</span>
+                </div>
+                <textarea className="glass-input" rows={8} value={csvText} onChange={e => setCsvText(e.target.value)} placeholder={`"What is X?","X is...","Polity"\n"Define Y","Y means...","Economy"`} style={{ marginBottom: 16, resize: "none" }} />
+                {importMsg && <div style={{ fontSize: 12, color: "#4ade80", marginBottom: 12, fontWeight: 600 }}>{importMsg}</div>}
+                <button className="glass-btn primary" onClick={handleImport}>📥 IMPORT CSV</button>
               </div>
-              <textarea className="glass-input" rows={8} value={csvText} onChange={e => setCsvText(e.target.value)} placeholder={`"What is X?","X is...","Polity"\n"Define Y","Y means...","Economy"`} style={{ marginBottom: 16, resize: "none" }} />
-              {importMsg && <div style={{ fontSize: 12, color: "#4ade80", marginBottom: 12, fontWeight: 600 }}>{importMsg}</div>}
-              <button className="glass-btn primary" onClick={handleImport}>📥 IMPORT CSV</button>
+
+              <div className="glass-panel" style={{ marginTop: 32, border: "1px solid rgba(239, 68, 68, 0.3)", background: "rgba(239, 68, 68, 0.05)" }}>
+                <div className="subtitle" style={{ color: "#ef4444" }}>Danger Zone</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 12 }}>
+                  This will delete all custom flashcards and reset progress to the initial state.
+                </div>
+                <button className="glass-btn" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.4)" }} onClick={() => {
+                  if (window.confirm("Are you sure? This will delete all custom cards and cannot be undone.")) {
+                    resetFlashcards();
+                  }
+                }}>
+                  ⚠️ RESET ALL FLASHCARDS
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -756,8 +939,14 @@
     }
 
     // ─── REWARDS (ARMORY) VIEW ────────────────────────────────────────────────────
-    function ArmoryView({ tokens, tokenHistory, redeemToken, streak }) {
+    function ArmoryView({ tokens, tokenHistory, redeemToken, streak, milestones, updateMilestones }) {
       const [deploying, setDeploying] = useState(null);
+      const [isEditingRewards, setIsEditingRewards] = useState(false);
+      const [editMilestones, setEditMilestones] = useState([...milestones]);
+
+      useEffect(() => {
+        if (!isEditingRewards) setEditMilestones([...milestones]);
+      }, [isEditingRewards, milestones]);
 
       const handleDeploy = (id) => {
         setDeploying(id);
@@ -767,47 +956,85 @@
         }, 800);
       };
 
-      const nextMilestones = [
-        { label: "7-Day Streak", target: 7, current: streak % 7, reward: "Special Meal 🍽️" },
-        { label: "30-Day Streak", target: 30, current: streak % 30, reward: "Movie Pass 🎬" },
-      ];
+      const handleAddMilestone = () => {
+        setEditMilestones([...editMilestones, { id: Date.now(), target: 14, rewardLabel: "New Reward", rewardEmoji: "🎁" }]);
+      };
+
+      const handleUpdateMilestone = (id, field, value) => {
+        setEditMilestones(editMilestones.map(m => m.id === id ? { ...m, [field]: value } : m));
+      };
+
+      const handleDeleteMilestone = (id) => {
+        setEditMilestones(editMilestones.filter(m => m.id !== id));
+      };
+
+      const handleSaveRewards = () => {
+        updateMilestones(editMilestones);
+        setIsEditingRewards(false);
+      };
+
+      const sortedMilestones = [...milestones].sort((a, b) => a.target - b.target);
 
       return (
         <div style={{ padding: "24px 16px" }}>
-          <div className="subtitle">Reward Vault</div>
-          <div className="title-gradient" style={{ fontSize: 20, marginBottom: 8 }}>THE ARMORY</div>
-          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 24, fontWeight: 500 }}>{tokens.length} token{tokens.length !== 1 ? "s" : ""} available</div>
+          <div className="subtitle stagger-item">Reward Vault</div>
+          <div className="title-gradient stagger-item" style={{ fontSize: 22, marginBottom: 8, animationDelay: "0.1s" }}>THE ARMORY</div>
+          <div className="stagger-item" style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginBottom: 24, fontWeight: 500, animationDelay: "0.2s" }}>{tokens.length} token{tokens.length !== 1 ? "s" : ""} available</div>
 
           <div style={{ marginBottom: 32 }}>
-            <div className="subtitle" style={{ marginBottom: 12 }}>Mission Progress</div>
-            {nextMilestones.map(m => (
-              <div key={m.label} className="glass-panel" style={{ padding: "16px", marginBottom: 12 }}>
+            <div className="stagger-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, animationDelay: "0.3s" }}>
+              <div className="subtitle" style={{ margin: 0 }}>Mission Progress</div>
+              <button onClick={() => setIsEditingRewards(!isEditingRewards)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 10, padding: "4px 8px", borderRadius: "10px", transition: "all 0.2s" }}>✏️ EDIT</button>
+            </div>
+
+            {isEditingRewards && (
+              <div className="glass-panel" style={{ marginBottom: 16, animation: "slideUpFade 0.3s ease forwards" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {editMilestones.map(m => (
+                    <div key={m.id} style={{ display: "flex", gap: 6, alignItems: "center", animation: "popIn 0.3s ease forwards" }}>
+                      <input className="glass-input" style={{ width: "60px", padding: "8px", textAlign: "center" }} type="number" min="1" value={m.target} onChange={e => handleUpdateMilestone(m.id, 'target', parseInt(e.target.value) || 0)} />
+                      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>days</span>
+                      <input className="glass-input" style={{ width: "45px", padding: "8px", textAlign: "center" }} value={m.rewardEmoji} onChange={e => handleUpdateMilestone(m.id, 'rewardEmoji', e.target.value)} maxLength={2} />
+                      <input className="glass-input" style={{ flex: 1, padding: "8px" }} value={m.rewardLabel} onChange={e => handleUpdateMilestone(m.id, 'rewardLabel', e.target.value)} placeholder="Label" />
+                      <button onClick={() => handleDeleteMilestone(m.id)} style={{ background: "none", border: "none", color: "#ef4444", fontSize: 16, cursor: "pointer", padding: "4px", transition: "transform 0.2s" }}>🗑️</button>
+                    </div>
+                  ))}
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <button className="glass-btn primary" onClick={handleAddMilestone} style={{ flex: 0.5 }}>➕ Add</button>
+                    <button className="glass-btn success pulse-glow" onClick={handleSaveRewards} style={{ flex: 1 }}>Save Loadout</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!isEditingRewards && sortedMilestones.map((m, idx) => (
+              <div key={m.id} className="glass-panel interactive stagger-item" style={{ padding: "16px", marginBottom: 12, animationDelay: `${0.3 + (idx * 0.1)}s` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "flex-end" }}>
-                  <div style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>{m.label} <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: 400, marginLeft: 4 }}>→ {m.reward}</span></div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>{m.current} / {m.target}</div>
+                  <div style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>{m.target}-Day Streak <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 500, marginLeft: 4 }}>→ {m.rewardEmoji} {m.rewardLabel}</span></div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>{streak % m.target} / {m.target}</div>
                 </div>
                 <div className="progress-track" style={{ height: 8 }}>
-                  <div className="progress-fill" style={{ width: `${(m.current / m.target) * 100}%` }} />
+                  <div className="progress-fill" style={{ width: `${((streak % m.target) / m.target) * 100}%` }} />
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="subtitle" style={{ marginBottom: 12 }}>Unspent Inventory</div>
+          <div className="subtitle stagger-item" style={{ marginBottom: 12, animationDelay: "0.5s" }}>Unspent Inventory</div>
 
           {tokens.length === 0 && (
-            <div className="glass-panel" style={{ textAlign: "center", padding: "40px 20px", borderStyle: "dashed" }}>
-              <div style={{ fontSize: 32, marginBottom: 12 }}>🎯</div>
+            <div className="glass-panel stagger-item" style={{ textAlign: "center", padding: "40px 20px", borderStyle: "dashed", animationDelay: "0.6s" }}>
+              <div className="float-icon" style={{ fontSize: 32, marginBottom: 12 }}>🎯</div>
               <div style={{ fontSize: 14, color: "#fff", fontWeight: 600, marginBottom: 4 }}>No tokens yet.</div>
               <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Hit daily goals and build streaks to earn rewards.</div>
             </div>
           )}
 
-          {tokens.map(token => {
+          {tokens.map((token, idx) => {
             const isDeploying = deploying === token.id;
             return (
-              <div key={token.id} className="glass-panel" style={{ padding: "16px", display: "flex", alignItems: "center", gap: 16, opacity: isDeploying ? 0.5 : 1, transform: isDeploying ? "scale(0.97)" : "none", transition: "all 0.3s" }}>
-                <div style={{ fontSize: 32, background: "rgba(255,255,255,0.1)", borderRadius: "50%", width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div key={token.id} className="glass-panel interactive stagger-item" style={{ padding: "16px", display: "flex", alignItems: "center", gap: 16, opacity: isDeploying ? 0.5 : 1, transform: isDeploying ? "scale(0.97)" : "none", animationDelay: `${0.6 + (idx * 0.1)}s` }}>
+                <div className="pulse-glow" style={{ fontSize: 32, background: "rgba(255,255,255,0.1)", borderRadius: "50%", width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {token.emoji}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -822,7 +1049,7 @@
           })}
 
           {tokenHistory.length > 0 && (
-            <div style={{ marginTop: 32 }}>
+            <div className="stagger-item" style={{ marginTop: 32, animationDelay: "0.8s" }}>
               <div className="subtitle" style={{ marginBottom: 12 }}>Campaign History</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[...tokenHistory].reverse().map(token => (
