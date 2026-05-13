@@ -12,19 +12,32 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
+    /* ─── DYNAMIC THEME VARIABLES ─── */
+    :root {
+      --bg-1: #0f2027; 
+      --bg-2: #203a43; 
+      --bg-3: #2c5364; 
+      --bg-4: #1a2a3a;
+      --accent-main: 56, 189, 248; /* RGB for #38bdf8 */
+      --accent-sec: 167, 139, 250; /* RGB for #a78bfa */
+      --title-grad-1: #e0f2fe; 
+      --title-grad-2: #7dd3fc; 
+      --title-grad-3: #c084fc;
+    }
+
     /* ─── GLOBAL STYLES & ANIMATED GLASSMORPHISM ─── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body { 
       font-family: 'Inter', sans-serif; 
-      /* Animated gradient background */
-      background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a3a);
+      background: linear-gradient(-45deg, var(--bg-1), var(--bg-2), var(--bg-3), var(--bg-4));
       background-size: 400% 400%;
       animation: ambientGradient 15s ease infinite;
       color: #ffffff; 
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
       color-scheme: dark;
+      transition: background 0.8s ease;
     }
     
     ::-webkit-scrollbar { width: 0; }
@@ -71,12 +84,12 @@
     }
     .glass-input:focus {
       background: rgba(0, 0, 0, 0.3);
-      border-color: rgba(56, 189, 248, 0.6);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+      border-color: rgba(var(--accent-main), 0.6);
+      box-shadow: 0 0 15px rgba(var(--accent-main), 0.2);
       transform: translateY(-1px);
     }
     .glass-input::placeholder { color: rgba(255, 255, 255, 0.4); }
-    .glass-input option { background: #203a43; color: #fff; }
+    .glass-input option { background: var(--bg-2); color: #fff; }
 
     /* Glass Buttons */
     .glass-btn {
@@ -104,13 +117,13 @@
     .glass-btn:active { transform: scale(0.95); }
     
     .glass-btn.primary {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: rgba(56, 189, 248, 0.4);
-      color: #bae6fd;
+      background: rgba(var(--accent-main), 0.2);
+      border-color: rgba(var(--accent-main), 0.4);
+      color: rgb(var(--accent-main));
     }
     .glass-btn.primary:hover {
-      background: rgba(56, 189, 248, 0.3);
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.25);
+      background: rgba(var(--accent-main), 0.3);
+      box-shadow: 0 6px 20px rgba(var(--accent-main), 0.25);
     }
     .glass-btn.success {
       background: rgba(34, 197, 94, 0.2);
@@ -155,13 +168,13 @@
       position: relative;
     }
     .tab-btn:hover { color: rgba(255, 255, 255, 0.7); transform: translateY(-2px); }
-    .tab-btn.active { color: #fff; transform: translateY(-4px); }
+    .tab-btn.active { color: rgb(var(--accent-main)); transform: translateY(-4px); }
     .tab-btn span.icon { 
       font-size: 22px; 
       margin-bottom: 2px; 
       transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .tab-btn.active span.icon { transform: scale(1.15); }
+    .tab-btn.active span.icon { transform: scale(1.15); text-shadow: 0 0 10px rgba(var(--accent-main), 0.5); }
 
     /* Animated Progress Bars */
     .progress-track {
@@ -174,7 +187,7 @@
     }
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, rgba(56, 189, 248, 0.8) 0%, rgba(167, 139, 250, 0.8) 50%, rgba(56, 189, 248, 0.8) 100%);
+      background: linear-gradient(90deg, rgba(var(--accent-main), 0.8) 0%, rgba(var(--accent-sec), 0.8) 50%, rgba(var(--accent-main), 0.8) 100%);
       background-size: 200% 100%;
       border-radius: 8px;
       transition: width 1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
@@ -204,7 +217,7 @@
 
     /* Typography & Utilities */
     .title-gradient {
-      background: linear-gradient(to right, #e0f2fe, #7dd3fc, #c084fc);
+      background: linear-gradient(to right, var(--title-grad-1), var(--title-grad-2), var(--title-grad-3));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-size: 200% auto;
@@ -265,28 +278,15 @@
       50% { transform: translateY(-6px); }
     }
 
-    /* Animation Classes */
-    .animate-page {
-      animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+    .animate-page { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .stagger-item { opacity: 0; animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .float-icon { display: inline-block; animation: float 4s ease-in-out infinite; }
     
-    .stagger-item {
-      opacity: 0;
-      animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .float-icon {
-      display: inline-block;
-      animation: float 4s ease-in-out infinite;
-    }
-
-    .pulse-glow {
-      animation: pulseGlow 2s infinite;
-    }
+    .pulse-glow { animation: pulseGlow 2s infinite; }
     @keyframes pulseGlow {
-      0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(var(--accent-main), 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(var(--accent-main), 0); }
+      100% { box-shadow: 0 0 0 0 rgba(var(--accent-main), 0); }
     }
   </style>
 </head>
@@ -295,6 +295,30 @@
 
   <script type="text/babel">
     const { useState, useEffect, useRef, useCallback } = React;
+
+    // ─── THEME CONFIGURATION ─────────────────────────────────────────────────────
+    const THEMES = {
+      default: {
+        name: "Night Ops",
+        vars: { "--bg-1": "#0f2027", "--bg-2": "#203a43", "--bg-3": "#2c5364", "--bg-4": "#1a2a3a", "--accent-main": "56, 189, 248", "--accent-sec": "167, 139, 250", "--title-grad-1": "#e0f2fe", "--title-grad-2": "#7dd3fc", "--title-grad-3": "#c084fc" }
+      },
+      imperial: { 
+        name: "Grand Strategy",
+        vars: { "--bg-1": "#1a1c15", "--bg-2": "#2d3725", "--bg-3": "#434024", "--bg-4": "#1a1c15", "--accent-main": "220, 38, 38", "--accent-sec": "217, 119, 6", "--title-grad-1": "#fef08a", "--title-grad-2": "#eab308", "--title-grad-3": "#b45309" }
+      },
+      richmond: {
+        name: "The Greyhound",
+        vars: { "--bg-1": "#070c17", "--bg-2": "#0f1c3f", "--bg-3": "#6b1111", "--bg-4": "#070c17", "--accent-main": "250, 204, 21", "--accent-sec": "220, 38, 38", "--title-grad-1": "#fef08a", "--title-grad-2": "#facc15", "--title-grad-3": "#a16207" }
+      },
+      blancos: {
+        name: "Los Blancos",
+        vars: { "--bg-1": "#020617", "--bg-2": "#0f172a", "--bg-3": "#1e293b", "--bg-4": "#020617", "--accent-main": "255, 255, 255", "--accent-sec": "234, 179, 8", "--title-grad-1": "#ffffff", "--title-grad-2": "#e2e8f0", "--title-grad-3": "#94a3b8" }
+      },
+      blaugrana: {
+        name: "Blaugrana",
+        vars: { "--bg-1": "#0b0002", "--bg-2": "#2e0008", "--bg-3": "#001033", "--bg-4": "#0b0002", "--accent-main": "234, 179, 8", "--accent-sec": "220, 38, 38", "--title-grad-1": "#fef08a", "--title-grad-2": "#facc15", "--title-grad-3": "#dc2626" }
+      }
+    };
 
     // ─── CONSTANTS ───────────────────────────────────────────────────────────────
     const SUBJECTS = ["History", "Geography", "Polity", "Economy", "Science", "Environment", "CSAT", "Current Affairs"];
@@ -318,6 +342,7 @@
     // ─── INITIAL STATE ────────────────────────────────────────────────────────────
     const getInitialState = () => {
       let state = {
+        theme: "default",
         startDate: "2025-06-01T00:00:00",
         targetDate: "2026-05-24T00:00:00",
         milestones: [
@@ -339,15 +364,6 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           state = { ...state, ...parsed };
-          
-          if (!state.startDate) state.startDate = "2025-06-01T00:00:00";
-          if (!state.targetDate) state.targetDate = "2026-05-24T00:00:00";
-          if (!state.milestones) {
-            state.milestones = [
-              { id: 1, target: 7, rewardLabel: "Biryani Cheat Meal", rewardEmoji: "🥘" },
-              { id: 2, target: 30, rewardLabel: "Gaming Session", rewardEmoji: "🎮" }
-            ];
-          }
         }
       } catch {}
       return state;
@@ -357,13 +373,7 @@
     const sm2 = (card, quality) => {
       const ef = Math.max(1.3, card.easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
       const interval = quality < 3 ? 1 : quality === 3 ? 1 : Math.round(card.interval * ef);
-      return {
-        ...card,
-        easeFactor: ef,
-        interval,
-        nextReview: Date.now() + interval * 24 * 60 * 60 * 1000,
-        reviewed: true,
-      };
+      return { ...card, easeFactor: ef, interval, nextReview: Date.now() + interval * 24 * 60 * 60 * 1000, reviewed: true };
     };
 
     // ─── TIME HELPERS ─────────────────────────────────────────────────────────────
@@ -384,6 +394,15 @@
       const [state, setState] = useState(getInitialState);
       const [tab, setTab] = useState("clock");
       const [now, setNow] = useState(Date.now());
+
+      // Apply Theme dynamically
+      useEffect(() => {
+        const root = document.documentElement;
+        const currentThemeVars = THEMES[state.theme || 'default'].vars;
+        Object.entries(currentThemeVars).forEach(([key, value]) => {
+          root.style.setProperty(key, value);
+        });
+      }, [state.theme]);
 
       useEffect(() => {
         try { localStorage.setItem("studycommand_v3_glass", JSON.stringify(state)); } catch {}
@@ -418,14 +437,7 @@
               
               if (!alreadyAwarded) {
                 newTokens.push({ 
-                  id: Date.now() + Math.random(), 
-                  type: "milestone", 
-                  milestoneId: m.id, 
-                  label: m.rewardLabel, 
-                  emoji: m.rewardEmoji, 
-                  date: today, 
-                  iteration, 
-                  spent: false 
+                  id: Date.now() + Math.random(), type: "milestone", milestoneId: m.id, label: m.rewardLabel, emoji: m.rewardEmoji, date: today, iteration, spent: false 
                 });
               }
             }
@@ -479,33 +491,16 @@
         setState(s => {
           const token = s.tokens.find(t => t.id === id);
           if (!token) return s;
-          return {
-            ...s,
-            tokens: s.tokens.filter(t => t.id !== id),
-            tokenHistory: [...s.tokenHistory, { ...token, spent: true, redeemedAt: Date.now() }],
-          };
+          return { ...s, tokens: s.tokens.filter(t => t.id !== id), tokenHistory: [...s.tokenHistory, { ...token, spent: true, redeemedAt: Date.now() }] };
         });
       }, []);
 
-      const updateTimeline = useCallback((newStart, newTarget) => {
-        setState(s => ({ ...s, startDate: newStart, targetDate: newTarget }));
-      }, []);
-
-      const updateMilestones = useCallback((newMilestones) => {
-        setState(s => ({ ...s, milestones: newMilestones }));
-      }, []);
-
-      const updateFlashcard = useCallback((updated) => {
-        setState(s => ({ ...s, flashcards: s.flashcards.map(c => c.id === updated.id ? updated : c) }));
-      }, []);
-
-      const addFlashcard = useCallback((card) => {
-        setState(s => ({ ...s, flashcards: [...s.flashcards, { ...card, id: Date.now(), interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false }] }));
-      }, []);
-
-      const resetFlashcards = useCallback(() => {
-        setState(s => ({ ...s, flashcards: [...DEFAULT_FLASHCARDS] }));
-      }, []);
+      const updateTimeline = useCallback((newStart, newTarget) => setState(s => ({ ...s, startDate: newStart, targetDate: newTarget })), []);
+      const updateTheme = useCallback((newTheme) => setState(s => ({ ...s, theme: newTheme })), []);
+      const updateMilestones = useCallback((newMilestones) => setState(s => ({ ...s, milestones: newMilestones })), []);
+      const updateFlashcard = useCallback((updated) => setState(s => ({ ...s, flashcards: s.flashcards.map(c => c.id === updated.id ? updated : c) })), []);
+      const addFlashcard = useCallback((card) => setState(s => ({ ...s, flashcards: [...s.flashcards, { ...card, id: Date.now(), interval: 1, nextReview: Date.now(), easeFactor: 2.5, reviewed: false }] })), []);
+      const resetFlashcards = useCallback(() => setState(s => ({ ...s, flashcards: [...DEFAULT_FLASHCARDS] })), []);
 
       const importCSV = useCallback((text) => {
         const lines = text.trim().split("\n").slice(1);
@@ -526,9 +521,8 @@
 
       return (
         <div className="app-container">
-          {/* Keying the wrapper forces re-mount animations on tab switch */}
           <div key={tab} className="animate-page">
-            {tab === "clock" && <ClockView countdown={countdown} msLeft={msLeft} todayHours={todayHours} streak={state.streak} longestStreak={state.longestStreak} tacticalRetreat={state.tacticalRetreat} sessions={state.sessions} now={now} targetDate={state.targetDate} startDate={state.startDate} updateTimeline={updateTimeline} />}
+            {tab === "clock" && <ClockView theme={state.theme} updateTheme={updateTheme} countdown={countdown} msLeft={msLeft} todayHours={todayHours} streak={state.streak} longestStreak={state.longestStreak} tacticalRetreat={state.tacticalRetreat} sessions={state.sessions} now={now} targetDate={state.targetDate} startDate={state.startDate} updateTimeline={updateTimeline} />}
             {tab === "log" && <LogView addSession={addSession} sessions={state.sessions} todayHours={todayHours} tacticalRetreat={state.tacticalRetreat} />}
             {tab === "cards" && <CardsView flashcards={state.flashcards} updateFlashcard={updateFlashcard} addFlashcard={addFlashcard} importCSV={importCSV} resetFlashcards={resetFlashcards} />}
             {tab === "armory" && <ArmoryView tokens={unspentTokens} tokenHistory={state.tokenHistory} redeemToken={redeemToken} streak={state.streak} milestones={state.milestones} updateMilestones={updateMilestones} />}
@@ -540,7 +534,7 @@
                 <span className="icon">{t.icon}</span>
                 {t.label}
                 {t.id === "armory" && unspentTokens.length > 0 && (
-                  <span style={{ position: "absolute", top: 0, right: 14, background: "#38bdf8", color: "#0f2027", borderRadius: "50%", width: 14, height: 14, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, animation: "popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }}>{unspentTokens.length}</span>
+                  <span style={{ position: "absolute", top: 0, right: 14, background: "rgb(var(--accent-main))", color: "var(--bg-1)", borderRadius: "50%", width: 14, height: 14, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, animation: "popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }}>{unspentTokens.length}</span>
                 )}
               </button>
             ))}
@@ -550,7 +544,7 @@
     }
 
     // ─── DASHBOARD (CLOCK) VIEW ───────────────────────────────────────────────────
-    function ClockView({ countdown, msLeft, todayHours, streak, longestStreak, tacticalRetreat, sessions, now, targetDate, startDate, updateTimeline }) {
+    function ClockView({ theme, updateTheme, countdown, msLeft, todayHours, streak, longestStreak, tacticalRetreat, sessions, now, targetDate, startDate, updateTimeline }) {
       const [isEditingDate, setIsEditingDate] = useState(false);
       const [tempStart, setTempStart] = useState(startDate.split('T')[0]);
       const [tempTarget, setTempTarget] = useState(targetDate.split('T')[0]);
@@ -577,7 +571,7 @@
             </div>
             <div style={{ textAlign: "right" }}>
               <div className="subtitle">Streak</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: streak >= 7 ? "#38bdf8" : "#fff", textShadow: streak >= 7 ? "0 0 15px rgba(56, 189, 248, 0.5)" : "none", transition: "all 0.3s" }}>🔥 {streak}</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: streak >= 7 ? "rgb(var(--accent-main))" : "#fff", textShadow: streak >= 7 ? "0 0 15px rgba(var(--accent-main), 0.5)" : "none", transition: "all 0.3s" }}>🔥 {streak}</div>
             </div>
           </div>
 
@@ -602,6 +596,12 @@
             {isEditingDate && (
               <div style={{ marginBottom: 20, background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 16, border: "1px solid rgba(255,255,255,0.05)", animation: "slideUpFade 0.3s ease forwards" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <span className="subtitle" style={{margin: 0}}>Theme</span>
+                  <select className="glass-input" style={{ width: "auto", padding: "8px" }} value={theme || 'default'} onChange={e => updateTheme(e.target.value)}>
+                    {Object.entries(THEMES).map(([id, t]) => <option key={id} value={id}>{t.name}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                   <span className="subtitle" style={{margin: 0}}>Start Date</span>
                   <input type="date" className="glass-input" style={{ width: "auto", padding: "8px" }} value={tempStart} onChange={e => setTempStart(e.target.value)} />
                 </div>
@@ -609,7 +609,7 @@
                   <span className="subtitle" style={{margin: 0}}>Target Date</span>
                   <input type="date" className="glass-input" style={{ width: "auto", padding: "8px" }} value={tempTarget} onChange={e => setTempTarget(e.target.value)} />
                 </div>
-                <button className="glass-btn success pulse-glow" onClick={() => { updateTimeline(`${tempStart}T00:00:00`, `${tempTarget}T00:00:00`); setIsEditingDate(false); }}>Save Timeline</button>
+                <button className="glass-btn success pulse-glow" onClick={() => { updateTimeline(`${tempStart}T00:00:00`, `${tempTarget}T00:00:00`); setIsEditingDate(false); }}>Save Settings</button>
               </div>
             )}
 
@@ -646,7 +646,7 @@
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {Object.entries(todaySubs).map(([sub, hrs]) => (
                   <div key={sub} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "6px 12px", fontSize: 11, color: "rgba(255,255,255,0.9)", fontWeight: 500, animation: "popIn 0.4s ease forwards" }}>
-                    {sub} <span style={{ color: "#38bdf8", fontWeight: 700, marginLeft: 4 }}>{hrs}h</span>
+                    {sub} <span style={{ color: "rgb(var(--accent-main))", fontWeight: 700, marginLeft: 4 }}>{hrs}h</span>
                   </div>
                 ))}
               </div>
@@ -699,7 +699,7 @@
           <div className="glass-panel interactive stagger-item" style={{ animationDelay: "0.1s" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: 10 }}>
               <span>TODAY: {todayHours.toFixed(1)}h / {goalNeeded}h</span>
-              <span style={{ color: remaining === 0 ? "#4ade80" : "#38bdf8", transition: "color 0.3s" }}>
+              <span style={{ color: remaining === 0 ? "#4ade80" : "rgb(var(--accent-main))", transition: "color 0.3s" }}>
                 {remaining === 0 ? "✓ GOAL MET" : `${remaining.toFixed(1)}h remaining`}
               </span>
             </div>
@@ -720,7 +720,7 @@
                 <input className="glass-input" type="number" min="0.5" max="16" step="0.5" value={hours} onChange={e => setHours(e.target.value)} style={{ flex: 1 }} />
                 <div style={{ display: "flex", gap: 6 }}>
                   {[1, 2, 3].map(h => (
-                    <button key={h} onClick={() => setHours(h)} className="glass-btn" style={{ padding: "10px", width: "auto", background: hours === h ? "rgba(56, 189, 248, 0.2)" : "rgba(255,255,255,0.05)", borderColor: hours === h ? "rgba(56, 189, 248, 0.4)" : "" }}>{h}h</button>
+                    <button key={h} onClick={() => setHours(h)} className="glass-btn" style={{ padding: "10px", width: "auto", background: hours === h ? "rgba(var(--accent-main), 0.2)" : "rgba(255,255,255,0.05)", borderColor: hours === h ? "rgba(var(--accent-main), 0.4)" : "" }}>{h}h</button>
                   ))}
                 </div>
               </div>
@@ -791,7 +791,7 @@
         const quality = direction === "right" ? 4 : 1;
         updateFlashcard(sm2(currentCard, quality));
         setFlipped(false);
-        setTimeout(() => setCardIndex(i => i + 1), 300); // Wait for transition
+        setTimeout(() => setCardIndex(i => i + 1), 300); 
       };
 
       const onTouchStart = (e) => {
@@ -851,14 +851,14 @@
                         
                         {/* Front */}
                         <div className="card-face glass-panel interactive" style={{ margin: 0, border: "1px solid rgba(255,255,255,0.2)" }}>
-                          <div className="subtitle" style={{ marginBottom: 16, color: "#38bdf8" }}>{currentCard?.subject}</div>
+                          <div className="subtitle" style={{ marginBottom: 16, color: "rgb(var(--accent-main))" }}>{currentCard?.subject}</div>
                           <div style={{ fontSize: 18, color: "#fff", lineHeight: 1.5, fontWeight: 500 }}>{currentCard?.front}</div>
                           <div style={{ position: "absolute", bottom: 20, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Tap to reveal</div>
                         </div>
                         
                         {/* Back */}
-                        <div className="card-face card-back glass-panel interactive" style={{ margin: 0, background: "rgba(56, 189, 248, 0.08)", border: "1px solid rgba(56, 189, 248, 0.4)", boxShadow: "0 10px 40px rgba(56, 189, 248, 0.1)" }}>
-                          <div className="subtitle" style={{ marginBottom: 16, color: "#38bdf8" }}>Answer</div>
+                        <div className="card-face card-back glass-panel interactive" style={{ margin: 0, background: "rgba(var(--accent-main), 0.08)", border: "1px solid rgba(var(--accent-main), 0.4)", boxShadow: "0 10px 40px rgba(var(--accent-main), 0.1)" }}>
+                          <div className="subtitle" style={{ marginBottom: 16, color: "rgb(var(--accent-main))" }}>Answer</div>
                           <div style={{ fontSize: 16, color: "#fff", lineHeight: 1.6 }}>{currentCard?.back}</div>
                         </div>
 
@@ -912,7 +912,7 @@
               <div className="glass-panel">
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginBottom: 16, lineHeight: 1.6 }}>
                   Paste CSV formatted text.<br />
-                  Format: <span style={{ color: "#38bdf8", fontWeight: 700 }}>front,back,subject</span>
+                  Format: <span style={{ color: "rgb(var(--accent-main))", fontWeight: 700 }}>front,back,subject</span>
                 </div>
                 <textarea className="glass-input" rows={8} value={csvText} onChange={e => setCsvText(e.target.value)} placeholder={`"What is X?","X is...","Polity"\n"Define Y","Y means...","Economy"`} style={{ marginBottom: 16, resize: "none" }} />
                 {importMsg && <div style={{ fontSize: 12, color: "#4ade80", marginBottom: 12, fontWeight: 600 }}>{importMsg}</div>}
